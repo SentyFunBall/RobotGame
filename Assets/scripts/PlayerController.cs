@@ -40,6 +40,6 @@ public class PlayerController : MonoBehaviour
         ).normalized * moveSpeed;
 
         // Since camera is tilted, W actually is forward + left, etc
-        rb.AddForce(move * Time.deltaTime * 10000);
+        rb.AddForce(move);
     }
 }
