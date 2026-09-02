@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private InputSystem_Actions controls;
     private Rigidbody rb;
+    private Vector2 moveInput;
 
     void Awake()
     {
@@ -32,7 +33,11 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector2 moveInput = controls.Player.Move.ReadValue<Vector2>();
+        moveInput = controls.Player.Move.ReadValue<Vector2>();
+    }
+
+    void FixedUpdate()
+    {
         Vector3 move = new Vector3(
             moveInput.x - moveInput.y,
             0.0f,
@@ -40,6 +45,6 @@ public class PlayerController : MonoBehaviour
         ).normalized * moveSpeed;
 
         // Since camera is tilted, W actually is forward + left, etc
-        rb.AddForce(move);
+        rb.AddForce(move * 10);
     }
 }
