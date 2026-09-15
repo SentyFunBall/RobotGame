@@ -3,6 +3,14 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [Flags]
+public enum RoomType
+{
+    None = 0,
+    Start = 1 << 0,
+    End = 1 << 1,
+}
+
+[Flags]
 public enum RoomConnections
 {
     None = 0,
@@ -19,6 +27,7 @@ public class RoomDefinition : ScriptableObject
 {
     public GameObject Prefab;
     public RoomConnections Connections;
+    public RoomType Type = RoomType.None;
 
     public bool CanConnect(RoomDefinition room, RoomConnections required)
     {

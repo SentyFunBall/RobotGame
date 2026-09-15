@@ -13,6 +13,22 @@ public class DungeonRoom
     public DungeonRoom West;
     public DungeonRoom Up;
     public DungeonRoom Down;
+
+    public IEnumerable<DungeonRoom> GetNeighbors()
+    {
+        if (North != null)
+            yield return North;
+        if (South != null)
+            yield return South;
+        if (East != null)
+            yield return East;
+        if (West != null)
+            yield return West;
+        if (Up != null)
+            yield return Up;
+        if (Down != null)
+            yield return Down;
+    }
 }
 
 [System.Serializable]
@@ -75,12 +91,36 @@ public class DungeonGenerator : MonoBehaviour
         DungeonRoom room = new DungeonRoom { GridPosition = position };
 
         // fill in neighbors
-        rooms.TryGetValue(position + Vector3Int.forward * Difficulty.Size, out room.North);
-        rooms.TryGetValue(position + Vector3Int.back * Difficulty.Size, out room.South);
-        rooms.TryGetValue(position + Vector3Int.right * Difficulty.Size, out room.East);
-        rooms.TryGetValue(position + Vector3Int.left * Difficulty.Size, out room.West);
-        rooms.TryGetValue(position + Vector3Int.up * Difficulty.Size, out room.Up);
-        rooms.TryGetValue(position + Vector3Int.down * Difficulty.Size, out room.Down);
+        if (
+            rooms.TryGetValue(position + Vector3Int.forward * Difficulty.Size, out room.North)
+            && room.North != null
+        )
+            room.North.South = room;
+        if (
+            rooms.TryGetValue(position + Vector3Int.back * Difficulty.Size, out room.South)
+            && room.South != null
+        )
+            room.South.North = room;
+        if (
+            rooms.TryGetValue(position + Vector3Int.right * Difficulty.Size, out room.East)
+            && room.East != null
+        )
+            room.East.West = room;
+        if (
+            rooms.TryGetValue(position + Vector3Int.left * Difficulty.Size, out room.West)
+            && room.West != null
+        )
+            room.West.East = room;
+        if (
+            rooms.TryGetValue(position + Vector3Int.up * Difficulty.Size, out room.Up)
+            && room.Up != null
+        )
+            room.Up.Down = room;
+        if (
+            rooms.TryGetValue(position + Vector3Int.down * Difficulty.Size, out room.Down)
+            && room.Down != null
+        )
+            room.Down.Up = room;
 
         room.RoomDefinition = prefab;
 
@@ -236,6 +276,19 @@ public class DungeonGenerator : MonoBehaviour
             openConnections.RemoveAll(oc => oc.Position == openConnection);
             AddOpenConnections(newRoom);
         }
+
+        // Pick start and end as two tiles with furthest dungeon path distance
+        // Using two-BFS to find dpd instead of 2D euclidean distance
+        var (startRoom, endRoom, _) = BFS.FindFurthestPair(startingRoom);
+
+        if (startRoom != null)
+        {
+            startRoom.RoomDefinition.Type |= RoomType.Start;
+        }
+        if (endRoom != null)
+        {
+            endRoom.RoomDefinition.Type |= RoomType.End;
+        }
         stopwatch.Stop();
         UnityEngine.Debug.Log("Dungeon generation time: " + stopwatch.ElapsedMilliseconds + " ms");
     }
@@ -249,6 +302,7 @@ public class DungeonGenerator : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void OnEnable()
     {
-        GenerateDungeon();
+        if (rooms.Count == 0)
+            GenerateDungeon();
     }
 }

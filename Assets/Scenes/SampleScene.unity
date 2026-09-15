@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!23 &58895668
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -620,6 +620,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b974658fb9fd4a439d936b25b268de2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonTestRenderer
+  m_physicMaterial: {fileID: 13400000, guid: 79bbbfd911262594db48fc05081539e9, type: 2}
 --- !u!4 &459078683
 Transform:
   m_ObjectHideFlags: 0
@@ -737,8 +738,8 @@ MonoBehaviour:
     PuzzleComplexity: 0
     TrapFrequency: 0
     Size: 10
-    RoomCount: 174
-  SpreadWeight: 11
+    RoomCount: 31
+  SpreadWeight: 10.93
 --- !u!4 &750310319
 Transform:
   m_ObjectHideFlags: 0
