@@ -28,6 +28,7 @@ public class DungeonTestRenderer : MonoBehaviour
             cube.transform.position = room.GridPosition;
             cube.transform.localScale = new Vector3(10, 1, 10);
             cube.GetComponent<Collider>().material = m_physicMaterial;
+            cube.name = "Room" + room.GridPosition;
 
             if (room.RoomDefinition.Type.HasFlag(RoomType.Start))
             {

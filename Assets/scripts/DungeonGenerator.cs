@@ -66,6 +66,10 @@ public class DungeonGenerator : MonoBehaviour
     public static Dictionary<Vector3Int, DungeonRoom> rooms = new();
     public static List<OpenConnection> openConnections = new List<OpenConnection>();
 
+    private static DungeonRoom startRoom;
+    private static DungeonRoom endRoom;
+    private static GameObject player;
+
     [Tooltip(
         "Weight that determines how much the dungeon spreads out. Higher values result in more spread."
     )]
@@ -283,11 +287,13 @@ public class DungeonGenerator : MonoBehaviour
 
         if (startRoom != null)
         {
-            startRoom.RoomDefinition.Type |= RoomType.Start;
+            DungeonGenerator.startRoom = startRoom;
+            DungeonGenerator.startRoom.RoomDefinition.Type |= RoomType.Start;
         }
         if (endRoom != null)
         {
-            endRoom.RoomDefinition.Type |= RoomType.End;
+            DungeonGenerator.endRoom = endRoom;
+            DungeonGenerator.endRoom.RoomDefinition.Type |= RoomType.End;
         }
         stopwatch.Stop();
         UnityEngine.Debug.Log("Dungeon generation time: " + stopwatch.ElapsedMilliseconds + " ms");
@@ -299,10 +305,23 @@ public class DungeonGenerator : MonoBehaviour
         rooms.Clear();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void OnEnable()
     {
         if (rooms.Count == 0)
             GenerateDungeon();
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            player.transform.position = new Vector3(
+                startRoom.GridPosition.x,
+                1,
+                startRoom.GridPosition.z
+            );
+        }
     }
 }
