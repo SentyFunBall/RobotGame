@@ -426,7 +426,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachCameraToPlayer
   playerObj: {fileID: 58895665}
-  posOff: {x: 3.65, y: 7.88, z: -1.09}
+  posOff: {x: 6.74, y: 13.5, z: -2.49}
   rotOff: {x: 63.4, y: -52.1, z: -2.037}
   smoothFactor: 0.125
 --- !u!1 &377036226
