@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ui:UXML
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ui="UnityEngine.UIElements"
-    xmlns:uie="UnityEditor.UIElements"
-    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
->
-    
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; background-color: rgb(87, 48, 48);">
+        <ui:Label text="Game Title" name="" style="color: rgb(255, 255, 255); -unity-text-align: upper-center;"/>
+        <ui:Button text="Start Game" enable-rich-text="false" style="color: rgb(0, 0, 0); background-color: rgb(219, 177, 131); width: 20%; align-self: center;"/>
+        <ui:Button text="Exit Game" style="background-color: rgb(219, 177, 131); align-self: center; width: 20%;"/>
+        <ui:Slider label="Difficulty" value="30" high-value="100" fill="false" show-input-field="true" inverted="false" style="background-color: rgb(87, 48, 48); color: rgb(255, 255, 255); aspect-ratio: auto; width: 50%; height: auto; -unity-text-align: upper-center; -unity-font-style: normal; align-self: center; align-content: flex-start; align-items: stretch; -unity-background-scale-mode: stretch-to-fill; -unity-text-auto-size: none;"/>
+    </ui:VisualElement>
 </ui:UXML>
