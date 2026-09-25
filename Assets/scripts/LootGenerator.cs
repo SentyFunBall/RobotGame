@@ -34,7 +34,11 @@ public class LootGenerator : MonoBehaviour
 
     private void GenerateLootForRoom(DungeonRoom room)
     {
-        if (Random.value < lootSpawnChance && totalLootCount < maxLootInDungeon)
+        if (
+            Random.value < lootSpawnChance
+            && totalLootCount < maxLootInDungeon
+            && !room.HasFeature(RoomFeatures.NoLoot)
+        )
         {
             if (!loot.ContainsKey(room))
             {
@@ -44,6 +48,7 @@ public class LootGenerator : MonoBehaviour
             GameObject newLoot = GameObject.CreatePrimitive(PrimitiveType.Cube);
             newLoot.GetComponent<Renderer>().material.color = Color.yellow;
             newLoot.AddComponent<Rigidbody>();
+            newLoot.layer = LayerMask.NameToLayer("Loot");
 
             // Generate random offset for loot placement within the room
             Vector3 randomOffset = new Vector3(Random.Range(-4f, 4f), 0, Random.Range(-4f, 4f));
