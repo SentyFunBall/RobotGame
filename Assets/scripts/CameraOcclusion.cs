@@ -23,6 +23,8 @@ public class CameraOcclusion : MonoBehaviour
     {
         HashSet<Renderer> hitThisFrame = new();
 
+        if (player == null)
+            return;
         Vector3 direction = player.position - transform.position;
         float distance = direction.magnitude;
 

@@ -762,7 +762,7 @@ MonoBehaviour:
     PuzzleComplexity: 0
     TrapFrequency: 0
     Size: 10
-    RoomCount: 12
+    RoomCount: 20
   allRooms:
   - {fileID: 2057855213105234470, guid: ca76ff37cbf74ae4d91a6a06154dc406, type: 3}
   - {fileID: 3445896060883321278, guid: a19455bda67fa9341a2b0e5347bf8052, type: 3}
