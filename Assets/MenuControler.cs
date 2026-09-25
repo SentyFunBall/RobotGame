@@ -6,41 +6,32 @@ using UnityEngine.UIElements;
 public class MenuControler : MonoBehaviour
 {
     Button startButton;
+    public GameObject titleScreen;
     Button exitButton;
+
+    private PanelRenderer panelRenderer;
 
     void OnEnable()
     {
-        var uiDoc = GetComponent<UIDocument>();
-
-        startButton = uiDoc.rootVisualElement.Q<Button>("StartButton");
-
-        exitButton = uiDoc.rootVisualElement.Q<Button>("ExitButton");
-
-        if(startButton != null)
-        {
-            startButton.clicked += PlayGame;
-        }
-
-        if(exitButton != null)
-        {
-            exitButton.clicked += ExitGame;
-        }
+        panelRenderer = titleScreen.GetComponent<PanelRenderer>();
+        panelRenderer.RegisterUIReloadCallback(OnUIReload);
 
     }
 
     void OnDisable()
     {
-        if(startButton != null)
-        {
-            startButton.clicked -= PlayGame;
-        }
-
-        if(exitButton != null)
-        {
-            exitButton.clicked -= ExitGame;
-        } 
+        panelRenderer.UnregisterUIReloadCallback(OnUIReload);
     }
 
+    void OnUIReload(PanelRenderer panelRenderer, VisualElement rootElement)
+    {
+        startButton = rootElement.Q<Button>("StartButton");
+
+        if(startButton != null)
+        {
+            startButton.clicked += PlayGame;
+        }
+    }
     public void PlayGame()
     {
         SceneManager.LoadScene(1);
