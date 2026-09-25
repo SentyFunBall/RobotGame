@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: grany_mat
+  m_Name: floor_grain_mat
   m_Shader: {fileID: -6465566751694194690, guid: 9d19e4bdf92e04c96bde4dfc8de0c2c0, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -38,11 +38,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Block_Size: 8
+    - _Depth_effect: 1
+    - _FadeAmt: 1
     - _GrainScale: 3985.1
+    - _Grain_Contrast: 0.33
+    - _Grain_Strength: 0.25
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _BaseColor: {r: 0.37735847, g: 0.37735847, b: 0.37735847, a: 1}
+    - _BaseColor: {r: 0.3207547, g: 0.3192417, b: 0.3192417, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &2234448620030464428
