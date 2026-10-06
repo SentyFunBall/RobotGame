@@ -133,8 +133,8 @@ GameObject:
   - component: {fileID: 58895671}
   - component: {fileID: 58895675}
   - component: {fileID: 58895674}
-  m_Layer: 0
-  m_Name: Capsule
+  m_Layer: 6
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -251,7 +251,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32eb2e5439ab97a458cefd4937c2f534, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  moveSpeed: 8.04
+  moveSpeed: 7
+  stepSize: 1.1
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 1
+  groundCheckDistance: 0.05
 --- !u!136 &58895675
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -259,7 +264,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 58895665}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 683ce10e97b988c40b33c118b6feb117, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -271,8 +276,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
+  m_Radius: 0.55
+  m_Height: 2.08
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
@@ -288,6 +293,7 @@ GameObject:
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
+  - component: {fileID: 330585549}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -335,7 +341,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.31
-  far clip plane: 20
+  far clip plane: 50
   field of view: 40
   orthographic: 0
   orthographic size: 5
@@ -426,9 +432,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachCameraToPlayer
   playerObj: {fileID: 58895665}
-  posOff: {x: 3.65, y: 7.88, z: -1.09}
+  posOff: {x: 6.74, y: 13.5, z: -2.49}
   rotOff: {x: 63.4, y: -52.1, z: -2.037}
   smoothFactor: 0.125
+--- !u!114 &330585549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb623e472d223074a90154984d13710c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  player: {fileID: 58895670}
+  occlusionMask:
+    serializedVersion: 2
+    m_Bits: 1
+  fadeSpeed: 8
 --- !u!1 &377036226
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,7 +638,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 459078681}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b974658fb9fd4a439d936b25b268de2, type: 3}
   m_Name: 
@@ -739,8 +762,16 @@ MonoBehaviour:
     PuzzleComplexity: 0
     TrapFrequency: 0
     Size: 10
-    RoomCount: 31
-  SpreadWeight: 10.93
+    RoomCount: 20
+  allRooms:
+  - {fileID: 2057855213105234470, guid: ca76ff37cbf74ae4d91a6a06154dc406, type: 3}
+  - {fileID: 3445896060883321278, guid: a19455bda67fa9341a2b0e5347bf8052, type: 3}
+  - {fileID: 6729948672366497536, guid: bffb5f0967c7f704cb8e6c66fa70c608, type: 3}
+  - {fileID: 7415232064637410703, guid: cbeea6fd03786e145863f838de5caf01, type: 3}
+  - {fileID: 1360593561222795825, guid: bc3cc7dc590fb2a4bbf6b370351d93a9, type: 3}
+  - {fileID: 5241965094570142634, guid: 884178095b4b36e45938dba812fe16ba, type: 3}
+  - {fileID: 6150793075238660969, guid: 5a42b9998cd926248a0f36c95ac0d2d0, type: 3}
+  SpreadWeight: 10.88
 --- !u!4 &750310319
 Transform:
   m_ObjectHideFlags: 0

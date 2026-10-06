@@ -7,7 +7,7 @@ public class AttachCameraToPlayer : MonoBehaviour
     // Default offsets
     [SerializeField]
     [Tooltip("Position offset of the camera relative to the player")]
-    private Vector3 posOff = new Vector3(3.65f, 7.88f, -1.09f);
+    private Vector3 posOff = new Vector3(6.74f, 13.5f, -2.49f);
 
     [SerializeField]
     [Tooltip("Rotation offset of the camera relative to the player")]
