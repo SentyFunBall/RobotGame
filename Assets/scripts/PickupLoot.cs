@@ -4,7 +4,7 @@ using UnityEngine;
 public class PickupLoot : MonoBehaviour
 {
     public GameObject textMesh;
-    public int lootCount = 0;
+    public static int lootCount = 0;
 
     [SerializeField]
     private string lootPrefix = "Loot: ";
