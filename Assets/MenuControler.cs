@@ -10,6 +10,7 @@ public class MenuControler : MonoBehaviour
     public GameObject titleScreen;
     //private Slider enemyStrengthSlider;
     private PanelRenderer panelRenderer;
+    public Foldout difficultyFoldout;
 
     void OnEnable()
     {
@@ -27,6 +28,7 @@ public class MenuControler : MonoBehaviour
     {
         startButton = rootElement.Q<Button>("StartButton");
         exitButton = rootElement.Q<Button>("ExitButton");
+        difficultyFoldout = rootElement.Q<Foldout>("DifficultyFoldout");
         //change difficulty to public in DungeonGenerator.cs line 65
         //add DontDestroyOnLoad(gameObject) to line 88
         /*
@@ -41,6 +43,19 @@ public class MenuControler : MonoBehaviour
             }
         }
         */
+        if(difficultyFoldout != null)
+        {
+            difficultyFoldout.value = false;
+            difficultyFoldout.RegisterValueChangedCallback(onFoldout);
+            Button easyButton = new Button() { text = "Easy"};
+            Button medButton = new Button() { text = "Medium"};
+            Button hardButton = new Button() { text = "Hard"};
+
+            difficultyFoldout.Add(easyButton);
+            difficultyFoldout.Add(medButton);
+            difficultyFoldout.Add(hardButton);
+        }
+        
         if(startButton != null)
         {
             startButton.clicked += PlayGame;
