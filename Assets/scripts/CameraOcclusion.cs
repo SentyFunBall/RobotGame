@@ -69,7 +69,11 @@ public class CameraOcclusion : MonoBehaviour
         foreach (RaycastHit hit in hits)
         {
             Renderer renderer = hit.collider.GetComponent<Renderer>();
-            if (renderer == null)
+            if (
+                renderer == null
+                || renderer.gameObject.CompareTag("Player")
+                || renderer.gameObject.CompareTag("NoOcclude")
+            )
                 continue;
 
             hitThisFrame.Add(renderer);
