@@ -398,13 +398,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.47865653, y: -0.36518776, z: 0.21714026, w: 0.7683593}
-  m_LocalPosition: {x: 3.19, y: 9.1924, z: -1.32}
-  m_LocalScale: {x: 0.99989367, y: 0.91590154, z: 0.6642051}
+  m_LocalRotation: {x: 0.52538866, y: 0.0093403775, z: -0.015123359, w: 0.8506767}
+  m_LocalPosition: {x: 0, y: 9.1924, z: -2.85}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 63.4, y: -52.1, z: -2.037}
+  m_LocalEulerAnglesHint: {x: 63.4, y: 0, z: -2.037}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -462,8 +462,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachCameraToPlayer
   playerObj: {fileID: 58895665}
-  posOff: {x: 6.74, y: 13.5, z: -2.49}
-  rotOff: {x: 63.4, y: -52.1, z: -2.037}
+  posOff: {x: 0, y: 13.5, z: -6}
+  rotOff: {x: 63.4, y: 0, z: 0}
   smoothFactor: 0.125
 --- !u!114 &330585549
 MonoBehaviour:

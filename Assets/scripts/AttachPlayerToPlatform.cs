@@ -10,6 +10,11 @@ public class AttachPlayerToPlatform : MonoBehaviour
         {
             isAttached = true;
             other.transform.parent = transform;
+            other.transform.position = new Vector3(
+                other.transform.position.x,
+                0.1f,
+                other.transform.position.z
+            );
         }
     }
 

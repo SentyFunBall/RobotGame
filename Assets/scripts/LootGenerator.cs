@@ -55,7 +55,7 @@ public class LootGenerator : MonoBehaviour
 
             newLoot.transform.position = new Vector3(
                 room.GridPosition.x + randomOffset.x,
-                0,
+                1,
                 room.GridPosition.z + randomOffset.z
             );
             newLoot.name = "Loot" + totalLootCount;
