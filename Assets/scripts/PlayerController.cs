@@ -15,11 +15,23 @@ public class PlayerController : MonoBehaviour
     private Collider playerCollider;
     private Vector2 moveInput;
 
+    private bool isSlow;
+    private bool isSprint;
+
+    [SerializeField]
+    private float slowMod = 0.5f;
+    private bool isSpeedPowerUpActive;
+
+    [SerializeField]
+    private float sprintMod = 1.5f;
+
     [SerializeField]
     private LayerMask groundMask;
 
     [SerializeField]
     private float groundCheckDistance = 0.05f;
+
+    private PowerUpManager powerUpManager;
 
     private bool TryStep(Vector3 moveDirection)
     {
@@ -68,20 +80,35 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         playerCollider = GetComponent<Collider>();
+        powerUpManager = PowerUpManager.instance;
     }
 
     // Update is called once per frame
     void Update()
     {
         moveInput = controls.Player.Move.ReadValue<Vector2>();
+        isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
+        isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
+        isSpeedPowerUpActive = powerUpManager.IsPowerUpActive(PowerUpType.Speed);
+
+        bool t = controls.Player.DEBUGAddPowerUp.ReadValue<float>() > 0.5f;
+        if (t)
+        {
+            powerUpManager.ActivatePowerUp(PowerUpType.Speed);
+        }
     }
 
     void FixedUpdate()
     {
         // Since camera is tilted, W actually is forward + left, etc
         Vector3 desiredVelocity =
-            new Vector3(moveInput.x - moveInput.y, 0.0f, moveInput.x + moveInput.y).normalized
-            * moveSpeed;
+            new Vector3(moveInput.x, 0.0f, moveInput.y).normalized
+            * moveSpeed
+            * (
+                isSlow ? slowMod
+                : (isSprint && isSpeedPowerUpActive) ? sprintMod
+                : 1f
+            );
 
         Vector3 groundNormal = Vector3.up;
         Vector3 velocity = rb.linearVelocity;

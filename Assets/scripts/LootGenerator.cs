@@ -8,9 +8,12 @@ public class LootGenerator : MonoBehaviour
     public int maxLootInDungeon;
     public int minLootInDungeon;
 
-    private int totalLootCount;
+    public static int totalLootCount;
 
     private Dictionary<DungeonRoom, List<GameObject>> loot = new();
+
+    [SerializeField]
+    private GameObject lootPrefab;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -45,10 +48,7 @@ public class LootGenerator : MonoBehaviour
                 loot[room] = new List<GameObject>();
             }
 
-            GameObject newLoot = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            newLoot.GetComponent<Renderer>().material.color = Color.yellow;
-            newLoot.AddComponent<Rigidbody>();
-            newLoot.layer = LayerMask.NameToLayer("Loot");
+            GameObject newLoot = Instantiate(lootPrefab);
 
             // Generate random offset for loot placement within the room
             Vector3 randomOffset = new Vector3(Random.Range(-4f, 4f), 0, Random.Range(-4f, 4f));
