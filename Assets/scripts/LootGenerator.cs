@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static SpawnUtility;
 
 public class LootGenerator : MonoBehaviour
 {
@@ -15,9 +17,9 @@ public class LootGenerator : MonoBehaviour
     [SerializeField]
     private GameObject lootPrefab;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public IEnumerator GenerateLoot()
     {
+        yield return null;
         dungeonRooms = DungeonGenerator.rooms;
 
         // bing bang boom generate loot for each dungeon room
@@ -28,9 +30,7 @@ public class LootGenerator : MonoBehaviour
         while (totalLootCount < minLootInDungeon)
         {
             // pick random rooms to add remaining loot
-            var randomRoom = new List<DungeonRoom>(dungeonRooms.Values)[
-                Random.Range(0, dungeonRooms.Count)
-            ];
+            var randomRoom = DungeonGenerator.GetRandomRoom();
             GenerateLootForRoom(randomRoom);
         }
     }
@@ -52,12 +52,18 @@ public class LootGenerator : MonoBehaviour
 
             // Generate random offset for loot placement within the room
             Vector3 randomOffset = new Vector3(Random.Range(-4f, 4f), 0, Random.Range(-4f, 4f));
+            if (
+                !TryGetRandomNavMeshPosition(
+                    room.GridPosition + randomOffset,
+                    4f,
+                    out Vector3 spawnPosition
+                )
+            )
+            {
+                return;
+            }
 
-            newLoot.transform.position = new Vector3(
-                room.GridPosition.x + randomOffset.x,
-                1,
-                room.GridPosition.z + randomOffset.z
-            );
+            newLoot.transform.position = spawnPosition;
             newLoot.name = "Loot" + totalLootCount;
             loot[room].Add(newLoot);
 

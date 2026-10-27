@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 185708148977809265}
   - component: {fileID: 8328073072050621232}
   - component: {fileID: 6861577755198423092}
+  - component: {fileID: 7556953660245628262}
   m_Layer: 0
   m_Name: Wall S
   m_TagString: Untagged
@@ -112,6 +113,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7556953660245628262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873981379252616766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 0.5, z: 1}
+  m_Center: {x: 0, y: 0.7, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &5591343599527467615
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,6 +142,7 @@ GameObject:
   - component: {fileID: 362104008123068080}
   - component: {fileID: 5969292858939232142}
   - component: {fileID: 5025532191206733892}
+  - component: {fileID: 8020881221175373559}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -225,6 +244,23 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: ad457a00d9c297a4ab0999dc25a3d1f8, type: 3}
+--- !u!114 &8020881221175373559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5591343599527467615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1.7220693, y: 0.9494038, z: 1.4858056}
+  m_Center: {x: 0.00031149387, y: 1.4303365, z: -0.24411291}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &6150793075238660969
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,6 +444,7 @@ GameObject:
   - component: {fileID: 7543834020500886479}
   - component: {fileID: 836511402929330520}
   - component: {fileID: 4490948689809230372}
+  - component: {fileID: 1318713221747778149}
   m_Layer: 0
   m_Name: Wall E
   m_TagString: Untagged
@@ -508,3 +545,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1318713221747778149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7789688511035273251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 0.5, z: 1}
+  m_Center: {x: 0, y: 0.72, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff

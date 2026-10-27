@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.AI.Navigation;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,6 +21,9 @@ public class DungeonDifficulty
 
     [Range(0, 250)]
     public int RoomCount = 50; // Default number of rooms in the dungeon
+
+    [Range(0, 100)]
+    public int numberOfEnemies;
 }
 
 public struct OpenConnection
@@ -33,14 +37,16 @@ public class DungeonGenerator : MonoBehaviour
 {
     public static DungeonGenerator Instance { get; private set; }
 
-    [SerializeField]
-    private DungeonDifficulty Difficulty = new DungeonDifficulty();
+    public DungeonDifficulty Difficulty = new DungeonDifficulty();
     public static Dictionary<Vector3Int, DungeonRoom> rooms = new();
     public static List<OpenConnection> openConnections = new List<OpenConnection>();
 
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
     private static GameObject player;
+
+    [SerializeField]
+    private GameObject navMesh;
 
     [SerializeField]
     private List<GameObject> allRooms = new List<GameObject>();
@@ -451,6 +457,10 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
 
+        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
+        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
+        StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
+
         MovePlayerToStart();
         stopwatch.Stop();
         UnityEngine.Debug.Log("Dungeon generation time: " + stopwatch.ElapsedMilliseconds + " ms");
@@ -473,5 +483,14 @@ public class DungeonGenerator : MonoBehaviour
     void Start()
     {
         MovePlayerToStart();
+    }
+
+    public static DungeonRoom GetRandomRoom()
+    {
+        if (rooms.Count == 0)
+            return null;
+
+        List<DungeonRoom> roomList = new List<DungeonRoom>(rooms.Values);
+        return roomList[Random.Range(0, roomList.Count)];
     }
 }
