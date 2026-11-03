@@ -60,8 +60,44 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
         Instance = this;
+        ApplyDifficulty(MenuControler.SelectedDifficulty);
     }
 
+    public void ApplyDifficulty(string difficultyName)
+    {
+        if (string.IsNullOrEmpty(difficultyName))
+        {
+            difficultyName = PlayerPrefs.GetString("GameDifficulty", "Medium");
+        }
+
+        switch (difficultyName)
+        {
+            case "Easy":
+            Difficulty.EnemyStrength = 5;
+            Difficulty.PuzzleComplexity = 5;
+            Difficulty.TrapFrequency = 5;
+            Difficulty.Size = 10;
+            Difficulty.RoomCount = 15;
+            break;
+
+            case "Hard":
+            Difficulty.EnemyStrength = 45;
+            Difficulty.PuzzleComplexity = 45;
+            Difficulty.TrapFrequency = 45;
+            Difficulty.Size = 16;
+            Difficulty.RoomCount = 35;
+            break;
+
+            case "Medium":
+            default:
+            Difficulty.EnemyStrength = 25;
+            Difficulty.PuzzleComplexity = 25;
+            Difficulty.TrapFrequency = 25;
+            Difficulty.Size = 13;
+            Difficulty.RoomCount = 25;
+            break;
+        }
+    }
     private DungeonRoom CreateRoom(GameObject prefab, int rotation, Vector3Int position)
     {
         if (IsPositionOccupied(position))

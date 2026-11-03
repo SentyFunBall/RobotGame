@@ -1,82 +1,123 @@
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class MenuControler : MonoBehaviour
 {
-    Button startButton;
-    Button exitButton;
+    private Button startButton;
+    private Button exitButton;
+    private DropdownField difficultyDropdown;
+
     public GameObject titleScreen;
-    //private Slider enemyStrengthSlider;
     private PanelRenderer panelRenderer;
-    public Foldout difficultyFoldout;
+
+    // Available difficulty choices
+    private static readonly List<string> DifficultyOptions = new List<string> { "Easy", "Medium", "Hard" };
+
+   
+    public static string SelectedDifficulty { get; private set; } = "Medium";
 
     void OnEnable()
     {
-        panelRenderer = titleScreen.GetComponent<PanelRenderer>();
-        panelRenderer.RegisterUIReloadCallback(OnUIReload);
-
+        if (titleScreen != null)
+        {
+            panelRenderer = titleScreen.GetComponent<PanelRenderer>();
+            if (panelRenderer != null)
+            {
+                panelRenderer.RegisterUIReloadCallback(OnUIReload);
+            }
+            else
+            {
+                Debug.LogWarning("[MenuControler] No PanelRenderer found on titleScreen GameObject.");
+            }
+        }
     }
 
     void OnDisable()
     {
-        panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+        if (panelRenderer != null)
+        {
+            panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+        }
+
+        // Unsubscribe callbacks to prevent memory leaks and duplicate triggers
+        if (startButton != null)
+        {
+            startButton.clicked -= PlayGame;
+        }
+
+        if (exitButton != null)
+        {
+            exitButton.clicked -= ExitGame;
+        }
+
+        if (difficultyDropdown != null)
+        {
+            difficultyDropdown.UnregisterValueChangedCallback(OnDifficultyChanged);
+        }
     }
 
-    void OnUIReload(PanelRenderer panelRenderer, VisualElement rootElement)
+    void OnUIReload(PanelRenderer renderer, VisualElement rootElement)
     {
         startButton = rootElement.Q<Button>("StartButton");
         exitButton = rootElement.Q<Button>("ExitButton");
-        difficultyFoldout = rootElement.Q<Foldout>("DifficultyFoldout");
-        //change difficulty to public in DungeonGenerator.cs line 65
-        //add DontDestroyOnLoad(gameObject) to line 88
-        /*
-        enemyStrengthSlider = rootElement.Q<Slider>("EnemyStrengthSlider");
-
-        if(DungeonGenerator.Instance != null)
-        {
-            if(enemyStrengthSlider != null)
-            {
-                enemyStrengthSlider.value = DungeonGenerator.Instance.Difficulty.EnemyStrength; 
-                enemyStrengthSlider.RegisterValueChangedCallback(OnEnemyStrengthChanged);
-            }
-        }
-        */
-        if(difficultyFoldout != null)
-        {
-            difficultyFoldout.value = false;
-            difficultyFoldout.RegisterValueChangedCallback(onFoldout);
-            Button easyButton = new Button() { text = "Easy"};
-            Button medButton = new Button() { text = "Medium"};
-            Button hardButton = new Button() { text = "Hard"};
-
-            difficultyFoldout.Add(easyButton);
-            difficultyFoldout.Add(medButton);
-            difficultyFoldout.Add(hardButton);
-        }
         
-        if(startButton != null)
+        difficultyDropdown = rootElement.Q<DropdownField>("DifficultyDropdown");
+
+        if (difficultyDropdown == null)
         {
+            difficultyDropdown = new DropdownField("Difficulty", DifficultyOptions, 1);
+            difficultyDropdown.name = "DifficultyDropdown";
+
+            VisualElement container = rootElement.Q<VisualElement>("MenuContainer") ?? rootElement;
+            container.Add(difficultyDropdown);
+        }
+        else
+        {
+            difficultyDropdown.choices = DifficultyOptions;
+            difficultyDropdown.value = SelectedDifficulty;
+        }
+
+        // Register value change callback (unregister first to avoid duplicates on UI reload)
+        difficultyDropdown.UnregisterValueChangedCallback(OnDifficultyChanged);
+        difficultyDropdown.RegisterValueChangedCallback(OnDifficultyChanged);
+
+        // 3. Bind Button click events
+        if (startButton != null)
+        {
+            startButton.clicked -= PlayGame;
             startButton.clicked += PlayGame;
         }
-
-        if(exitButton != null)
+        else
         {
+            Debug.LogWarning("[MenuControler] 'StartButton' not found in VisualElement hierarchy.");
+        }
+
+        if (exitButton != null)
+        {
+            exitButton.clicked -= ExitGame;
             exitButton.clicked += ExitGame;
         }
+        else
+        {
+            Debug.LogWarning("[MenuControler] 'ExitButton' not found in VisualElement hierarchy.");
+        }
     }
+
+    private void OnDifficultyChanged(ChangeEvent<string> evt)
+    {
+        SelectedDifficulty = evt.newValue;
+        PlayerPrefs.SetString("GameDifficulty",SelectedDifficulty);
+        PlayerPrefs.Save();
+        Debug.Log($"[MenuControler] Difficulty changed to: {SelectedDifficulty}");
+    }
+
     public void PlayGame()
     {
         SceneManager.LoadScene(1);
     }
-    /*
-    private void OnEnemyStrengthChanged(ChangeEvent<float> evt)
-    {
-        DungeonGenerator.Instance.Difficulty.EnemyStrength = Mathf.RoundToInt(evt.newValue);
 
-    }
-    */
     public void ExitGame()
     {
         #if UNITY_EDITOR
