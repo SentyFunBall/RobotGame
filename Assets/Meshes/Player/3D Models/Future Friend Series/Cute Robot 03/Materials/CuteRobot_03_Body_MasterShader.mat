@@ -134,7 +134,7 @@ Material:
     - _BUILTIN_ZWrite: 1
     - _BUILTIN_ZWriteControl: 0
     - _BumpScale: 1
-    - _Contrast: 1
+    - _Contrast: 0.904
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -142,7 +142,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Hue: 0
+    - _Hue: 0.257
     - _Level_Black: 0
     - _Level_Gamma: 1
     - _Level_White: 1
@@ -154,13 +154,13 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _SMOOTHNESSSOURCE: 0
-    - _Saturation: 1
+    - _Saturation: 0.204
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Temperature: 0
-    - _Tint: 0
+    - _Temperature: -0.34
+    - _Tint: -0.52
     - _UVSec: 0
     - _X_Speed: 0
     - _Y_Speed: 0

@@ -201,7 +201,8 @@ public class DungeonGenerator : MonoBehaviour
             {
                 RoomConnections rotated = RoomDefinition.RotateConnections(
                     definition.Connections,
-                    rotation
+                    rotation,
+                    definition
                 );
                 if ((rotated & required) != required)
                     continue;

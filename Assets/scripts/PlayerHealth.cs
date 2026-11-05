@@ -1,6 +1,8 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -25,6 +27,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField]
     private GameMenusController gameMenusController;
 
+    [SerializeField]
+    private Slider healthBar;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -34,6 +39,11 @@ public class PlayerHealth : MonoBehaviour
         {
             Debug.LogError("CharacterAnimation component not found on player.");
         }
+        if (healthBar == null)
+        {
+            Debug.LogError("HealthBar component not assigned.");
+        }
+        healthBar.value = health / maxHealth;
     }
 
     public void Update()
@@ -66,6 +76,10 @@ public class PlayerHealth : MonoBehaviour
         {
             characterAnimation.Hit();
         }
+        if (healthBar != null)
+        {
+            healthBar.value = health / maxHealth;
+        }
     }
 
     public void Heal(float amount)
@@ -74,6 +88,10 @@ public class PlayerHealth : MonoBehaviour
         if (health > maxHealth)
         {
             health = maxHealth;
+        }
+        if (healthBar != null)
+        {
+            healthBar.value = health / maxHealth;
         }
     }
 }

@@ -41,6 +41,7 @@ public class RoomDefinition : ScriptableObject
     public RoomConnections Connections;
     public RoomType Type = RoomType.None;
     public RoomFeatures Features = RoomFeatures.None;
+    public bool CanRotate = true;
 
     public bool CanConnect(RoomDefinition room, RoomConnections required)
     {
@@ -56,8 +57,14 @@ public class RoomDefinition : ScriptableObject
     };
 
     // Rotates a connection mask clockwise by the given number of 90 degree steps.
-    public static RoomConnections RotateConnections(RoomConnections connections, int steps)
+    public static RoomConnections RotateConnections(
+        RoomConnections connections,
+        int steps,
+        RoomDefinition room
+    )
     {
+        if (!room.CanRotate)
+            return connections;
         steps = ((steps % 4) + 4) % 4;
         if (steps == 0)
             return connections;
