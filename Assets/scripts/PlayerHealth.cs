@@ -20,11 +20,17 @@ public class PlayerHealth : MonoBehaviour
 
     [SerializeField]
     private GameObject healthTextObject;
+    private CharacterAnimation characterAnimation;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         health = maxHealth;
+        characterAnimation = GetComponent<CharacterAnimation>();
+        if (characterAnimation == null)
+        {
+            Debug.LogError("CharacterAnimation component not found on player.");
+        }
     }
 
     public void Update()
@@ -41,6 +47,14 @@ public class PlayerHealth : MonoBehaviour
         if (health < 0)
         {
             health = 0;
+        }
+        if (health == 0 && characterAnimation != null)
+        {
+            characterAnimation.SetDead(true);
+        }
+        if (characterAnimation != null)
+        {
+            characterAnimation.Hit();
         }
     }
 

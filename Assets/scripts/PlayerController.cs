@@ -7,7 +7,6 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public float stepSize = 1.5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private InputSystem_Actions controls;
@@ -33,34 +32,6 @@ public class PlayerController : MonoBehaviour
 
     private PowerUpManager powerUpManager;
     private CharacterAnimation characterAnimation;
-
-    private bool TryStep(Vector3 moveDirection)
-    {
-        Vector3 origin = transform.position;
-        // is there an obstacle at foot level
-        if (!Physics.Raycast(origin, moveDirection, out RaycastHit lowerHit, 0.6f, groundMask))
-            return false;
-
-        // is there space above the obstacle to step up
-        Vector3 upperOrigin = origin + Vector3.up * stepSize;
-        if (Physics.Raycast(upperOrigin, moveDirection, 0.1f, groundMask))
-            return false;
-
-        // we can step. get the actual step height so we dont fuckin jump
-        Vector3 checkPos = lowerHit.point + moveDirection * 0.05f + Vector3.up * stepSize;
-
-        if (Physics.Raycast(checkPos, Vector3.down, out RaycastHit topHit, stepSize, groundMask))
-        {
-            float step = topHit.point.y - rb.position.y;
-            if (step > 0f && step <= stepSize)
-            {
-                rb.position += Vector3.up * step + moveDirection * 0.05f + Vector3.up * 1.1f;
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     void Awake()
     {
@@ -136,8 +107,6 @@ public class PlayerController : MonoBehaviour
         {
             groundNormal = hit.normal;
         }
-
-        TryStep(desiredVelocity.normalized);
 
         Vector3 move = Vector3.ProjectOnPlane(velocityChange, groundNormal);
 

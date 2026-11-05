@@ -9,6 +9,7 @@ public class CharacterAnimation : MonoBehaviour
     private static readonly int AttackHash = Animator.StringToHash("Attack");
     private static readonly int LookAroundHash = Animator.StringToHash("LookAround");
     private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+    private static readonly int HitHash = Animator.StringToHash("Hit");
 
     public void FindAndSetAnimator()
     {
@@ -37,5 +38,10 @@ public class CharacterAnimation : MonoBehaviour
     public void SetDead(bool dead)
     {
         animator.SetBool(IsDeadHash, dead);
+    }
+
+    public void Hit()
+    {
+        animator.SetTrigger(HitHash);
     }
 }

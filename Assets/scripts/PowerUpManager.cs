@@ -28,7 +28,7 @@ public class PowerUpManager : MonoBehaviour
         }
 
         instance = this;
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
     }
 
     public void ActivatePowerUp(PowerUpType powerUpType)
