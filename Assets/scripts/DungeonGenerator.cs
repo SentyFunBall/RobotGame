@@ -329,8 +329,7 @@ public class DungeonGenerator : MonoBehaviour
     private DungeonRoom GenerateLayout()
     {
         // Build the connected topology without requiring any special room type yet.
-        openConnections.Clear();
-        rooms.Clear();
+        ClearRooms();
         RoomPlacement? startPlacement = PickCompatibleRoom(Vector3Int.zero);
         if (startPlacement == null)
         {
@@ -434,29 +433,69 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    public void GenerateDungeon()
+    private bool TryGenerateRooms()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
         startRoom = null;
         endRoom = null;
         hasWon = false;
 
         DungeonRoom layoutRoot = GenerateLayout();
         if (layoutRoot == null)
-            return;
+            return false;
 
         // Choose endpoints from the completed topology before assigning room types.
         var (layoutStart, layoutEnd, _) = BFS.FindFurthestPair(layoutRoot);
         if (layoutStart == null || layoutEnd == null)
         {
-            UnityEngine.Debug.LogError("Could not find furthest rooms for the dungeon.");
-            return;
+            UnityEngine.Debug.LogWarning("Could not find furthest rooms for the dungeon.");
+            return false;
         }
 
         if (!PopulateRooms(layoutStart.GridPosition, layoutEnd.GridPosition))
         {
-            UnityEngine.Debug.LogError("Could not populate the dungeon with compatible rooms.");
+            UnityEngine.Debug.LogWarning("Could not populate the dungeon with compatible rooms.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ClearRooms()
+    {
+        foreach (DungeonRoom room in rooms.Values)
+        {
+            if (room == null)
+                continue;
+            if (Application.isPlaying)
+                Destroy(room.gameObject);
+            else
+                DestroyImmediate(room.gameObject);
+        }
+        rooms.Clear();
+        openConnections.Clear();
+    }
+
+    public void GenerateDungeon()
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        // Generation is random and can fail, which used to leave the player with no floor
+        // to stand on. Retry with a fresh layout until one works.
+        const int maxAttempts = 50;
+        bool generated = false;
+        for (int attempt = 0; attempt < maxAttempts && !generated; attempt++)
+        {
+            generated = TryGenerateRooms();
+            if (!generated)
+                ClearRooms();
+        }
+
+        if (!generated)
+        {
+            UnityEngine.Debug.LogError(
+                $"Dungeon generation failed after {maxAttempts} attempts."
+            );
             return;
         }
 

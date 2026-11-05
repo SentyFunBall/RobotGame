@@ -33,6 +33,21 @@ public class PlayerController : MonoBehaviour
     private PowerUpManager powerUpManager;
     private CharacterAnimation characterAnimation;
 
+    private bool doAttack;
+
+    [SerializeField]
+    private float attackRange = 2f;
+
+    [SerializeField]
+    private float attackDamage = 10f;
+
+    [SerializeField]
+    private LayerMask enemyMask;
+
+    [SerializeField]
+    private float attackCooldown = 2.0f;
+    private float nextAttackTime;
+
     void Awake()
     {
         controls = new InputSystem_Actions();
@@ -69,8 +84,12 @@ public class PlayerController : MonoBehaviour
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
         isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
         isSpeedPowerUpActive = powerUpManager.IsPowerUpActive(PowerUpType.Speed);
+        // Latch the press: Update can run several times between FixedUpdates, and
+        // overwriting with `triggered` each frame dropped most attack inputs
+        if (controls.Player.Attack.triggered)
+            doAttack = true;
 
-        bool t = controls.Player.DEBUGAddPowerUp.ReadValue<float>() > 0.5f;
+        bool t = controls.Player.DEBUGAddPowerUp.triggered;
         if (t)
         {
             powerUpManager.ActivatePowerUp(PowerUpType.Speed);
@@ -146,7 +165,43 @@ public class PlayerController : MonoBehaviour
         float speed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
         if (characterAnimation != null)
         {
-            characterAnimation.SetMovementSpeed(speed);
+            if (isSprint && isSpeedPowerUpActive)
+                characterAnimation.Sprint(speed);
+            else
+                characterAnimation.SetMovementSpeed(speed);
+        }
+
+        // Attack
+        if (doAttack)
+        {
+            doAttack = false;
+            if (Time.time < nextAttackTime)
+                return;
+            nextAttackTime = Time.time + attackCooldown;
+            Transform playerChild = transform.GetChild(0);
+            Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+            // Cast from body height; the child pivot is at the feet, below enemy colliders
+            Vector3 origin = playerCollider.bounds.center;
+            const float attackRadius = 0.5f;
+            if (
+                Physics.SphereCast(
+                    origin,
+                    attackRadius,
+                    attackDir,
+                    out RaycastHit hitInfo,
+                    attackRange,
+                    enemyMask,
+                    QueryTriggerInteraction.Ignore
+                )
+            )
+            {
+                EnemyAI enemy = hitInfo.collider.GetComponentInParent<EnemyAI>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(attackDamage);
+                }
+            }
+            characterAnimation.Attack();
         }
     }
 }

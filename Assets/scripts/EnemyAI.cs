@@ -43,6 +43,11 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float attackDamage;
 
+    private float health;
+
+    [SerializeField]
+    private float maxHealth = 10f;
+
     [SerializeField]
     private EnemyType enemyType = EnemyType.Melee;
 
@@ -82,6 +87,7 @@ public class EnemyAI : MonoBehaviour
         enemyCollider = GetComponentInChildren<Collider>();
         characterAnimation = GetComponent<CharacterAnimation>();
         characterAnimation.FindAndSetAnimator();
+        health = maxHealth;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -103,6 +109,8 @@ public class EnemyAI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!agent.isActiveAndEnabled)
+            return;
         if (player == null)
         {
             return;
@@ -157,8 +165,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (characterAnimation != null)
         {
-            float speed =
-                meleeState == MeleeState.Lunge ? lungeSpeed : agent.velocity.magnitude;
+            float speed = meleeState == MeleeState.Lunge ? lungeSpeed : agent.velocity.magnitude;
             characterAnimation.SetMovementSpeed(speed);
         }
     }
@@ -251,5 +258,22 @@ public class EnemyAI : MonoBehaviour
                 playerHealth.TakeDamage(attackDamage);
             }
         }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        health -= damage;
+        if (health <= 0f)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        characterAnimation.SetDead(true);
+        agent.enabled = false;
+        if (enemyCollider != null)
+            enemyCollider.enabled = false;
     }
 }
