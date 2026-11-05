@@ -44,6 +44,7 @@ public class DungeonGenerator : MonoBehaviour
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
     private static GameObject player;
+    private bool hasWon;
 
     [SerializeField]
     private GameObject navMesh;
@@ -438,6 +439,7 @@ public class DungeonGenerator : MonoBehaviour
         stopwatch.Start();
         startRoom = null;
         endRoom = null;
+        hasWon = false;
 
         DungeonRoom layoutRoot = GenerateLayout();
         if (layoutRoot == null)
@@ -483,6 +485,28 @@ public class DungeonGenerator : MonoBehaviour
     void Start()
     {
         MovePlayerToStart();
+    }
+
+    void Update()
+    {
+        if (hasWon || endRoom == null)
+            return;
+
+        if (player == null)
+            player = GameObject.FindWithTag("Player");
+        if (player == null)
+            return;
+
+        // Rooms are centered on their grid position and spaced Size units apart
+        float halfSize = Difficulty.Size * 0.5f;
+        Vector3 offset = player.transform.position - endRoom.transform.position;
+        if (Mathf.Abs(offset.x) > halfSize || Mathf.Abs(offset.z) > halfSize)
+            return;
+
+        hasWon = true;
+        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
+        if (menus != null)
+            menus.ShowWinMenu();
     }
 
     public static DungeonRoom GetRandomRoom()
