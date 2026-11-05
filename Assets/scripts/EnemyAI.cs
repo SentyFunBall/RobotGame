@@ -260,11 +260,14 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    private bool dying;
+
     public void TakeDamage(float damage)
     {
         health -= damage;
-        if (health <= 0f)
+        if (health <= 0f && !dying)
         {
+            dying = true;
             Die();
         }
     }
@@ -275,5 +278,22 @@ public class EnemyAI : MonoBehaviour
         agent.enabled = false;
         if (enemyCollider != null)
             enemyCollider.enabled = false;
+        StartCoroutine(ShrinkAndDisable());
+    }
+
+    private System.Collections.IEnumerator ShrinkAndDisable()
+    {
+        yield return new WaitForSeconds(1f);
+
+        const float shrinkDuration = 0.5f;
+        Vector3 startScale = transform.localScale;
+        for (float t = 0f; t < shrinkDuration; t += Time.deltaTime)
+        {
+            transform.localScale = Vector3.Lerp(startScale, Vector3.zero, t / shrinkDuration);
+            yield return null;
+        }
+
+        transform.localScale = Vector3.zero;
+        gameObject.SetActive(false);
     }
 }

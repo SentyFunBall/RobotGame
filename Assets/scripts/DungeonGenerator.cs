@@ -431,6 +431,10 @@ public class DungeonGenerator : MonoBehaviour
                 startRoom.GridPosition.z
             );
         }
+        if (!player)
+        {
+            UnityEngine.Debug.LogError("Player appears to have been deleted");
+        }
     }
 
     private bool TryGenerateRooms()
@@ -493,9 +497,7 @@ public class DungeonGenerator : MonoBehaviour
 
         if (!generated)
         {
-            UnityEngine.Debug.LogError(
-                $"Dungeon generation failed after {maxAttempts} attempts."
-            );
+            UnityEngine.Debug.LogError($"Dungeon generation failed after {maxAttempts} attempts.");
             return;
         }
 
@@ -503,7 +505,7 @@ public class DungeonGenerator : MonoBehaviour
         StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
         StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
 
-        MovePlayerToStart();
+        //MovePlayerToStart();
         stopwatch.Stop();
         UnityEngine.Debug.Log("Dungeon generation time: " + stopwatch.ElapsedMilliseconds + " ms");
     }
