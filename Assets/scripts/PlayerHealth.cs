@@ -22,6 +22,9 @@ public class PlayerHealth : MonoBehaviour
     private GameObject healthTextObject;
     private CharacterAnimation characterAnimation;
 
+    [SerializeField]
+    private GameMenusController gameMenusController;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -48,9 +51,16 @@ public class PlayerHealth : MonoBehaviour
         {
             health = 0;
         }
-        if (health == 0 && characterAnimation != null)
+        if (health == 0)
         {
-            characterAnimation.SetDead(true);
+            if (characterAnimation != null)
+            {
+                characterAnimation.SetDead(true);
+            }
+            if (gameMenusController != null)
+            {
+                gameMenusController.ShowDeathMenu();
+            }
         }
         if (characterAnimation != null)
         {

@@ -8,6 +8,7 @@ public class MenuControler : MonoBehaviour
     Button startButton;
     Button exitButton;
     public GameObject titleScreen;
+
     //private Slider enemyStrengthSlider;
     private PanelRenderer panelRenderer;
 
@@ -15,7 +16,6 @@ public class MenuControler : MonoBehaviour
     {
         panelRenderer = titleScreen.GetComponent<PanelRenderer>();
         panelRenderer.RegisterUIReloadCallback(OnUIReload);
-
     }
 
     void OnDisable()
@@ -36,25 +36,27 @@ public class MenuControler : MonoBehaviour
         {
             if(enemyStrengthSlider != null)
             {
-                enemyStrengthSlider.value = DungeonGenerator.Instance.Difficulty.EnemyStrength; 
+                enemyStrengthSlider.value = DungeonGenerator.Instance.Difficulty.EnemyStrength;
                 enemyStrengthSlider.RegisterValueChangedCallback(OnEnemyStrengthChanged);
             }
         }
         */
-        if(startButton != null)
+        if (startButton != null)
         {
             startButton.clicked += PlayGame;
         }
 
-        if(exitButton != null)
+        if (exitButton != null)
         {
             exitButton.clicked += ExitGame;
         }
     }
+
     public void PlayGame()
     {
         SceneManager.LoadScene(1);
     }
+
     /*
     private void OnEnemyStrengthChanged(ChangeEvent<float> evt)
     {
@@ -64,10 +66,10 @@ public class MenuControler : MonoBehaviour
     */
     public void ExitGame()
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#else
         Application.Quit();
-        #endif
+#endif
     }
 }

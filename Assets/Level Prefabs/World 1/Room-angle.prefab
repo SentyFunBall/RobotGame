@@ -257,8 +257,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
   m_SerializedVersion: 0
-  m_Size: {x: 1.7220693, y: 0.9494038, z: 1.4858056}
-  m_Center: {x: 0.00031149387, y: 1.4303365, z: -0.24411291}
+  m_Size: {x: 1.7220693, y: 2.28, z: 1.4858056}
+  m_Center: {x: 0.00031149387, y: 0.28, z: -0.24411291}
   m_Area: 1
   m_AffectedAgents: ffffffff
 --- !u!1 &6150793075238660969
