@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Room-Angle
   m_EditorClassIdentifier: Assembly-CSharp::RoomDefinition
   Connections: 6
-  Type: 3
+  Type: 0
   Features: 0

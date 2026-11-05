@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.AI.Navigation;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,6 +21,9 @@ public class DungeonDifficulty
 
     [Range(0, 250)]
     public int RoomCount = 50; // Default number of rooms in the dungeon
+
+    [Range(0, 100)]
+    public int numberOfEnemies;
 }
 
 public struct OpenConnection
@@ -33,14 +37,17 @@ public class DungeonGenerator : MonoBehaviour
 {
     public static DungeonGenerator Instance { get; private set; }
 
-    [SerializeField]
-    private DungeonDifficulty Difficulty = new DungeonDifficulty();
+    public DungeonDifficulty Difficulty = new DungeonDifficulty();
     public static Dictionary<Vector3Int, DungeonRoom> rooms = new();
     public static List<OpenConnection> openConnections = new List<OpenConnection>();
 
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
     private static GameObject player;
+    private bool hasWon;
+
+    [SerializeField]
+    private GameObject navMesh;
 
     [SerializeField]
     private List<GameObject> allRooms = new List<GameObject>();
@@ -230,7 +237,8 @@ public class DungeonGenerator : MonoBehaviour
             {
                 RoomConnections rotated = RoomDefinition.RotateConnections(
                     definition.Connections,
-                    rotation
+                    rotation,
+                    definition
                 );
                 if ((rotated & required) != required)
                     continue;
@@ -357,8 +365,7 @@ public class DungeonGenerator : MonoBehaviour
     private DungeonRoom GenerateLayout()
     {
         // Build the connected topology without requiring any special room type yet.
-        openConnections.Clear();
-        rooms.Clear();
+        ClearRooms();
         RoomPlacement? startPlacement = PickCompatibleRoom(Vector3Int.zero);
         if (startPlacement == null)
         {
@@ -460,34 +467,81 @@ public class DungeonGenerator : MonoBehaviour
                 startRoom.GridPosition.z
             );
         }
+        if (!player)
+        {
+            UnityEngine.Debug.LogError("Player appears to have been deleted");
+        }
+    }
+
+    private bool TryGenerateRooms()
+    {
+        startRoom = null;
+        endRoom = null;
+        hasWon = false;
+
+        DungeonRoom layoutRoot = GenerateLayout();
+        if (layoutRoot == null)
+            return false;
+
+        // Choose endpoints from the completed topology before assigning room types.
+        var (layoutStart, layoutEnd, _) = BFS.FindFurthestPair(layoutRoot);
+        if (layoutStart == null || layoutEnd == null)
+        {
+            UnityEngine.Debug.LogWarning("Could not find furthest rooms for the dungeon.");
+            return false;
+        }
+
+        if (!PopulateRooms(layoutStart.GridPosition, layoutEnd.GridPosition))
+        {
+            UnityEngine.Debug.LogWarning("Could not populate the dungeon with compatible rooms.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ClearRooms()
+    {
+        foreach (DungeonRoom room in rooms.Values)
+        {
+            if (room == null)
+                continue;
+            if (Application.isPlaying)
+                Destroy(room.gameObject);
+            else
+                DestroyImmediate(room.gameObject);
+        }
+        rooms.Clear();
+        openConnections.Clear();
     }
 
     public void GenerateDungeon()
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        startRoom = null;
-        endRoom = null;
 
-        DungeonRoom layoutRoot = GenerateLayout();
-        if (layoutRoot == null)
-            return;
-
-        // Choose endpoints from the completed topology before assigning room types.
-        var (layoutStart, layoutEnd, _) = BFS.FindFurthestPair(layoutRoot);
-        if (layoutStart == null || layoutEnd == null)
+        // Generation is random and can fail, which used to leave the player with no floor
+        // to stand on. Retry with a fresh layout until one works.
+        const int maxAttempts = 50;
+        bool generated = false;
+        for (int attempt = 0; attempt < maxAttempts && !generated; attempt++)
         {
-            UnityEngine.Debug.LogError("Could not find furthest rooms for the dungeon.");
+            generated = TryGenerateRooms();
+            if (!generated)
+                ClearRooms();
+        }
+
+        if (!generated)
+        {
+            UnityEngine.Debug.LogError($"Dungeon generation failed after {maxAttempts} attempts.");
             return;
         }
 
-        if (!PopulateRooms(layoutStart.GridPosition, layoutEnd.GridPosition))
-        {
-            UnityEngine.Debug.LogError("Could not populate the dungeon with compatible rooms.");
-            return;
-        }
+        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
+        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
+        StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
 
-        MovePlayerToStart();
+        //MovePlayerToStart();
         stopwatch.Stop();
         UnityEngine.Debug.Log("Dungeon generation time: " + stopwatch.ElapsedMilliseconds + " ms");
     }
@@ -509,5 +563,36 @@ public class DungeonGenerator : MonoBehaviour
     void Start()
     {
         MovePlayerToStart();
+    }
+
+    void Update()
+    {
+        if (hasWon || endRoom == null)
+            return;
+
+        if (player == null)
+            player = GameObject.FindWithTag("Player");
+        if (player == null)
+            return;
+
+        // Rooms are centered on their grid position and spaced Size units apart
+        float halfSize = Difficulty.Size * 0.5f;
+        Vector3 offset = player.transform.position - endRoom.transform.position;
+        if (Mathf.Abs(offset.x) > halfSize || Mathf.Abs(offset.z) > halfSize)
+            return;
+
+        hasWon = true;
+        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
+        if (menus != null)
+            menus.ShowWinMenu();
+    }
+
+    public static DungeonRoom GetRandomRoom()
+    {
+        if (rooms.Count == 0)
+            return null;
+
+        List<DungeonRoom> roomList = new List<DungeonRoom>(rooms.Values);
+        return roomList[Random.Range(0, roomList.Count)];
     }
 }

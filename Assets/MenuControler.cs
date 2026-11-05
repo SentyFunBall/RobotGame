@@ -10,12 +10,18 @@ public class MenuControler : MonoBehaviour
     private DropdownField difficultyDropdown;
 
     public GameObject titleScreen;
+
+    //private Slider enemyStrengthSlider;
     private PanelRenderer panelRenderer;
 
     // Available difficulty choices
-    private static readonly List<string> DifficultyOptions = new List<string> { "Easy", "Medium", "Hard" };
+    private static readonly List<string> DifficultyOptions = new List<string>
+    {
+        "Easy",
+        "Medium",
+        "Hard",
+    };
 
-   
     public static string SelectedDifficulty { get; private set; } = "Medium";
 
     void OnEnable()
@@ -29,7 +35,9 @@ public class MenuControler : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("[MenuControler] No PanelRenderer found on titleScreen GameObject.");
+                Debug.LogWarning(
+                    "[MenuControler] No PanelRenderer found on titleScreen GameObject."
+                );
             }
         }
     }
@@ -62,7 +70,7 @@ public class MenuControler : MonoBehaviour
     {
         startButton = rootElement.Q<Button>("StartButton");
         exitButton = rootElement.Q<Button>("ExitButton");
-        
+
         difficultyDropdown = rootElement.Q<DropdownField>("DifficultyDropdown");
 
         if (difficultyDropdown == null)
@@ -108,7 +116,7 @@ public class MenuControler : MonoBehaviour
     private void OnDifficultyChanged(ChangeEvent<string> evt)
     {
         SelectedDifficulty = evt.newValue;
-        PlayerPrefs.SetString("GameDifficulty",SelectedDifficulty);
+        PlayerPrefs.SetString("GameDifficulty", SelectedDifficulty);
         PlayerPrefs.Save();
         Debug.Log($"[MenuControler] Difficulty changed to: {SelectedDifficulty}");
     }
@@ -120,10 +128,10 @@ public class MenuControler : MonoBehaviour
 
     public void ExitGame()
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#else
         Application.Quit();
-        #endif
+#endif
     }
 }

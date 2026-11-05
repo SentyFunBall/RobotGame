@@ -1,13 +1,12 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterAnimation))]
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public float stepSize = 1.5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private InputSystem_Actions controls;
@@ -32,38 +31,28 @@ public class PlayerController : MonoBehaviour
     private float groundCheckDistance = 0.05f;
 
     private PowerUpManager powerUpManager;
+    private CharacterAnimation characterAnimation;
 
-    private bool TryStep(Vector3 moveDirection)
-    {
-        Vector3 origin = transform.position;
-        // is there an obstacle at foot level
-        if (!Physics.Raycast(origin, moveDirection, out RaycastHit lowerHit, 0.6f, groundMask))
-            return false;
+    private bool doAttack;
 
-        // is there space above the obstacle to step up
-        Vector3 upperOrigin = origin + Vector3.up * stepSize;
-        if (Physics.Raycast(upperOrigin, moveDirection, 0.1f, groundMask))
-            return false;
+    [SerializeField]
+    private float attackRange = 2f;
 
-        // we can step. get the actual step height so we dont fuckin jump
-        Vector3 checkPos = lowerHit.point + moveDirection * 0.05f + Vector3.up * stepSize;
+    [SerializeField]
+    private float attackDamage = 10f;
 
-        if (Physics.Raycast(checkPos, Vector3.down, out RaycastHit topHit, stepSize, groundMask))
-        {
-            float step = topHit.point.y - rb.position.y;
-            if (step > 0f && step <= stepSize)
-            {
-                rb.position += Vector3.up * step + moveDirection * 0.05f + Vector3.up * 1.1f;
-                return true;
-            }
-        }
+    [SerializeField]
+    private LayerMask enemyMask;
 
-        return false;
-    }
+    [SerializeField]
+    private float attackCooldown = 2.0f;
+    private float nextAttackTime;
 
     void Awake()
     {
         controls = new InputSystem_Actions();
+        characterAnimation = GetComponent<CharacterAnimation>();
+        characterAnimation.FindAndSetAnimator();
     }
 
     void OnEnable()
@@ -81,6 +70,11 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerCollider = GetComponent<Collider>();
         powerUpManager = PowerUpManager.instance;
+        characterAnimation = GetComponent<CharacterAnimation>();
+        if (characterAnimation == null)
+        {
+            Debug.LogError("CharacterAnimation not found on player.");
+        }
     }
 
     // Update is called once per frame
@@ -90,8 +84,12 @@ public class PlayerController : MonoBehaviour
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
         isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
         isSpeedPowerUpActive = powerUpManager.IsPowerUpActive(PowerUpType.Speed);
+        // Latch the press: Update can run several times between FixedUpdates, and
+        // overwriting with `triggered` each frame dropped most attack inputs
+        if (controls.Player.Attack.triggered)
+            doAttack = true;
 
-        bool t = controls.Player.DEBUGAddPowerUp.ReadValue<float>() > 0.5f;
+        bool t = controls.Player.DEBUGAddPowerUp.triggered;
         if (t)
         {
             powerUpManager.ActivatePowerUp(PowerUpType.Speed);
@@ -129,8 +127,6 @@ public class PlayerController : MonoBehaviour
             groundNormal = hit.normal;
         }
 
-        TryStep(desiredVelocity.normalized);
-
         Vector3 move = Vector3.ProjectOnPlane(velocityChange, groundNormal);
 
         rb.AddForce(move, ForceMode.Acceleration);
@@ -139,6 +135,73 @@ public class PlayerController : MonoBehaviour
         if (moveInput == Vector2.zero && grounded)
         {
             rb.AddForce(-velocity * 0.1f, ForceMode.VelocityChange);
+        }
+
+        // Rotate player child to face direction of actual travel, not input direction
+        if (moveInput != Vector2.zero)
+        {
+            Transform playerChild = transform.GetChild(0); // Assuming the first child is the visual representation of the player
+            Vector3 forward = Vector3
+                .ProjectOnPlane(Camera.main.transform.forward, Vector3.up)
+                .normalized;
+            Vector3 right = Vector3
+                .ProjectOnPlane(Camera.main.transform.right, Vector3.up)
+                .normalized;
+            Vector3 moveDir = rb.linearVelocity;
+            moveDir.y = 0f;
+            if (moveDir.sqrMagnitude < 0.001f)
+            {
+                moveDir = (forward * moveInput.y + right * moveInput.x).normalized;
+            }
+            Quaternion targetRotation = Quaternion.LookRotation(moveDir, Vector3.up);
+            playerChild.rotation = Quaternion.Slerp(
+                playerChild.rotation,
+                targetRotation,
+                Time.fixedDeltaTime * 10f
+            );
+        }
+
+        // Update animator
+        float speed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+        if (characterAnimation != null)
+        {
+            if (isSprint && isSpeedPowerUpActive)
+                characterAnimation.Sprint(speed);
+            else
+                characterAnimation.SetMovementSpeed(speed);
+        }
+
+        // Attack
+        if (doAttack)
+        {
+            doAttack = false;
+            if (Time.time < nextAttackTime)
+                return;
+            nextAttackTime = Time.time + attackCooldown;
+            Transform playerChild = transform.GetChild(0);
+            Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+            // Cast from body height; the child pivot is at the feet, below enemy colliders
+            Vector3 origin = playerCollider.bounds.center;
+            const float attackRadius = 0.5f;
+            if (
+                Physics.SphereCast(
+                    origin,
+                    attackRadius,
+                    attackDir,
+                    out RaycastHit hitInfo,
+                    attackRange,
+                    enemyMask,
+                    QueryTriggerInteraction.Ignore
+                )
+            )
+            {
+                EnemyAI enemy = hitInfo.collider.GetComponentInParent<EnemyAI>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(attackDamage);
+                }
+            }
+            characterAnimation.Attack();
         }
     }
 }

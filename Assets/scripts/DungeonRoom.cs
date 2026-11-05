@@ -48,7 +48,8 @@ public class DungeonRoom : MonoBehaviour
     {
         RoomConnections effective = RoomDefinition.RotateConnections(
             RoomDefinition.Connections,
-            Rotation
+            Rotation,
+            RoomDefinition
         );
         return (effective & required) != 0;
     }
@@ -68,7 +69,8 @@ public class DungeonRoom : MonoBehaviour
     {
         RoomConnections localDirection = RoomDefinition.RotateConnections(
             worldDirection,
-            -Rotation
+            -Rotation,
+            RoomDefinition
         );
         GameObject door = GetDoor(localDirection);
         if (door != null)
