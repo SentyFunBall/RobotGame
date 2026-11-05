@@ -1,9 +1,9 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterAnimation))]
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     private float groundCheckDistance = 0.05f;
 
     private PowerUpManager powerUpManager;
+    private CharacterAnimation characterAnimation;
 
     private bool TryStep(Vector3 moveDirection)
     {
@@ -64,6 +65,8 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         controls = new InputSystem_Actions();
+        characterAnimation = GetComponent<CharacterAnimation>();
+        characterAnimation.FindAndSetAnimator();
     }
 
     void OnEnable()
@@ -81,6 +84,11 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerCollider = GetComponent<Collider>();
         powerUpManager = PowerUpManager.instance;
+        characterAnimation = GetComponent<CharacterAnimation>();
+        if (characterAnimation == null)
+        {
+            Debug.LogError("CharacterAnimation not found on player.");
+        }
     }
 
     // Update is called once per frame
@@ -139,6 +147,37 @@ public class PlayerController : MonoBehaviour
         if (moveInput == Vector2.zero && grounded)
         {
             rb.AddForce(-velocity * 0.1f, ForceMode.VelocityChange);
+        }
+
+        // Rotate player child to face direction of actual travel, not input direction
+        if (moveInput != Vector2.zero)
+        {
+            Transform playerChild = transform.GetChild(0); // Assuming the first child is the visual representation of the player
+            Vector3 forward = Vector3
+                .ProjectOnPlane(Camera.main.transform.forward, Vector3.up)
+                .normalized;
+            Vector3 right = Vector3
+                .ProjectOnPlane(Camera.main.transform.right, Vector3.up)
+                .normalized;
+            Vector3 moveDir = rb.linearVelocity;
+            moveDir.y = 0f;
+            if (moveDir.sqrMagnitude < 0.001f)
+            {
+                moveDir = (forward * moveInput.y + right * moveInput.x).normalized;
+            }
+            Quaternion targetRotation = Quaternion.LookRotation(moveDir, Vector3.up);
+            playerChild.rotation = Quaternion.Slerp(
+                playerChild.rotation,
+                targetRotation,
+                Time.fixedDeltaTime * 10f
+            );
+        }
+
+        // Update animator
+        float speed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+        if (characterAnimation != null)
+        {
+            characterAnimation.SetMovementSpeed(speed);
         }
     }
 }

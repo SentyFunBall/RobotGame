@@ -8,6 +8,8 @@ public enum DetectionState
     Sneak,
 }
 
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(CharacterAnimation))]
 public class EnemyAI : MonoBehaviour
 {
     [Header("Detection")]
@@ -35,9 +37,13 @@ public class EnemyAI : MonoBehaviour
     private Transform player;
     private float nextAttackTime;
 
+    private CharacterAnimation characterAnimation;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        characterAnimation = GetComponent<CharacterAnimation>();
+        characterAnimation.FindAndSetAnimator();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -94,20 +100,28 @@ public class EnemyAI : MonoBehaviour
         {
             agent.isStopped = true;
         }
+
+        // Update animator with current movement speed
+        if (characterAnimation != null)
+        {
+            float speed = agent.velocity.magnitude;
+            characterAnimation.SetMovementSpeed(speed);
+        }
     }
 
     private void Attack()
     {
         if (Time.time >= nextAttackTime)
         {
-            // Implement attack logic here, e.g., reduce player health
+            characterAnimation.Attack();
+            nextAttackTime = Time.time + 3f; // Assuming 3 second cooldown between attacks
+
+            // Apply damage to the player
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(attackDamage);
             }
-            nextAttackTime = Time.time + 1f; // Example attack cooldown of 1 second
-            Debug.Log("Enemy attacked the player for " + attackDamage + " damage.");
         }
     }
 }
