@@ -1,5 +1,60 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &358300596089950934
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2619127613422609375}
+  - component: {fileID: 5206400648638800946}
+  m_Layer: 0
+  m_Name: Fakeroom
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2619127613422609375
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358300596089950934}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3236713200620233840}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5206400648638800946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358300596089950934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 986ff81bcdbd06143bf9d2feeeeb5c5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonRoom
+  GridPosition: {x: 0, y: 0, z: 0}
+  North: {fileID: 4329236759603790127}
+  South: {fileID: 0}
+  East: {fileID: 0}
+  West: {fileID: 0}
+  DoorN: {fileID: 0}
+  DoorS: {fileID: 3520864922693880920}
+  DoorE: {fileID: 0}
+  DoorW: {fileID: 0}
+  RoomDefinition: {fileID: 11400000, guid: 611b0d5a43d766e428ecf9ba3279ff1d, type: 2}
+  Rotation: 0
 --- !u!1 &8764145812679102166
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,15 +130,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 11.88374
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.4638
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -14.16319
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -127,19 +182,31 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8119302516784761647}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2619127613422609375}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4329236759603790127}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5966506091669874189}
     - targetCorrespondingSourceObject: {fileID: 7414896876092078570, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4830928840987266688}
     - targetCorrespondingSourceObject: {fileID: -1912260045564200015, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3697175476148333757}
+    - targetCorrespondingSourceObject: {fileID: -1912260045564200015, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8732534787269981458}
     - targetCorrespondingSourceObject: {fileID: 3211316870205438915, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4919246914287874887}
+    - targetCorrespondingSourceObject: {fileID: 3211316870205438915, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7985843844936275687}
     - targetCorrespondingSourceObject: {fileID: -7224553345187754045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1376116719720667783}
@@ -170,6 +237,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.375, y: 2.0975873, z: 6}
   m_Center: {x: 0.125, y: 1.0487937, z: -1.5}
+--- !u!114 &7985843844936275687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 572317042777290840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 0.83, y: 0.79, z: 6.11}
+  m_Center: {x: 0, y: 2.35, z: -1.28}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &2855507758126022346 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
@@ -189,7 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonRoom
   GridPosition: {x: 0, y: 0, z: 0}
   North: {fileID: 0}
-  South: {fileID: 0}
+  South: {fileID: 5206400648638800946}
   East: {fileID: 0}
   West: {fileID: 0}
   DoorN: {fileID: 0}
@@ -198,6 +282,38 @@ MonoBehaviour:
   DoorW: {fileID: 0}
   RoomDefinition: {fileID: 11400000, guid: 611b0d5a43d766e428ecf9ba3279ff1d, type: 2}
   Rotation: 0
+--- !u!114 &5966506091669874189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2855507758126022346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.13333334
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 50af30e7eb898d2409125ec69829cc9c, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!4 &3236713200620233840 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 78eeefb581e3f1d4fa4449fe0598787e, type: 3}
@@ -281,3 +397,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.375, y: 2.1088858, z: 6}
   m_Center: {x: -0.125, y: 1.0544429, z: -1.5}
+--- !u!114 &8732534787269981458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5627227266423273514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 0.83, y: 0.79, z: 6.11}
+  m_Center: {x: 0, y: 2.35, z: -1.28}
+  m_Area: 1
+  m_AffectedAgents: ffffffff

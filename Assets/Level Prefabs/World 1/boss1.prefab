@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 985793497157800635}
   - component: {fileID: 8882321351810128677}
+  - component: {fileID: 2795932299610250451}
   m_Layer: 0
   m_Name: boss1
   m_TagString: Untagged
@@ -60,6 +61,38 @@ MonoBehaviour:
   DoorW: {fileID: 0}
   RoomDefinition: {fileID: 11400000, guid: 242044c68b1135349a686cc086649547, type: 2}
   Rotation: 0
+--- !u!114 &2795932299610250451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497064308611172353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.13333334
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: e5b495a6e0886b3489d41cefca0a98f3, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &1268255367536523923
 GameObject:
   m_ObjectHideFlags: 0
@@ -946,6 +979,7 @@ GameObject:
   - component: {fileID: 1034184981239643631}
   - component: {fileID: 6417612175082104885}
   - component: {fileID: 709284137698822676}
+  - component: {fileID: 6360242712711673224}
   m_Layer: 0
   m_Name: floor
   m_TagString: Untagged
@@ -1047,6 +1081,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.75, y: 0.625, z: 4.5}
   m_Center: {x: -0.375, y: -0.1875, z: 0.25}
+--- !u!114 &6360242712711673224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4222899443538665942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 4, y: 3, z: 2.6782255}
+  m_Center: {x: 0, y: 1, z: -2.742463}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &4603904318601774858
 GameObject:
   m_ObjectHideFlags: 0

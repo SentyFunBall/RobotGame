@@ -83,7 +83,7 @@ public class DungeonGenerator : MonoBehaviour
             Difficulty.EnemyStrength = 5;
             Difficulty.PuzzleComplexity = 5;
             Difficulty.TrapFrequency = 5;
-            Difficulty.Size = 10;
+            Difficulty.Size = 50;
             Difficulty.RoomCount = 15;
             break;
 
@@ -91,7 +91,7 @@ public class DungeonGenerator : MonoBehaviour
             Difficulty.EnemyStrength = 45;
             Difficulty.PuzzleComplexity = 45;
             Difficulty.TrapFrequency = 45;
-            Difficulty.Size = 16;
+            Difficulty.Size = 50;
             Difficulty.RoomCount = 35;
             break;
 
@@ -100,7 +100,7 @@ public class DungeonGenerator : MonoBehaviour
             Difficulty.EnemyStrength = 25;
             Difficulty.PuzzleComplexity = 25;
             Difficulty.TrapFrequency = 25;
-            Difficulty.Size = 13;
+            Difficulty.Size = 50;
             Difficulty.RoomCount = 25;
             break;
         }
@@ -233,7 +233,7 @@ public class DungeonGenerator : MonoBehaviour
             if (requiredType != RoomType.None && (definition.Type & requiredType) != requiredType)
                 continue;
 
-            for (int rotation = 0; rotation < 4; rotation++)
+            /*for (int rotation = 0; rotation < 4; rotation++)
             {
                 RoomConnections rotated = RoomDefinition.RotateConnections(
                     definition.Connections,
@@ -246,7 +246,8 @@ public class DungeonGenerator : MonoBehaviour
                     continue;
 
                 candidates.Add(new RoomPlacement { Prefab = prefabObject, Rotation = rotation });
-            }
+            }*/
+            candidates.Add(new RoomPlacement { Prefab = prefabObject, Rotation = 0 });
         }
 
         if (candidates.Count == 0)
@@ -537,7 +538,6 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
 
-        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
         StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
         StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
 
@@ -548,8 +548,7 @@ public class DungeonGenerator : MonoBehaviour
 
     public void ResetDungeon()
     {
-        openConnections.Clear();
-        rooms.Clear();
+        ClearRooms();
         startRoom = null;
         endRoom = null;
     }

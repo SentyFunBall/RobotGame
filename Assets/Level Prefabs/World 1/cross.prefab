@@ -75,15 +75,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.39367
+      value: -49.96046
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.00099
+      value: 8.79773
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -20.14465
+      value: 236.69704
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalRotation.w
@@ -138,6 +138,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8711119411704272366}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5547413307092203658}
     - targetCorrespondingSourceObject: {fileID: 1241444634789409460, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6694046880902534318}
@@ -150,15 +153,27 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8985261861220009602, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7540839022647235344}
+    - targetCorrespondingSourceObject: {fileID: 8985261861220009602, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2151237887549615217}
     - targetCorrespondingSourceObject: {fileID: 8796908271945996922, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6585891816122519471}
+    - targetCorrespondingSourceObject: {fileID: 8796908271945996922, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 622856174197998690}
     - targetCorrespondingSourceObject: {fileID: 8025630091765411504, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5680969053486142424}
+    - targetCorrespondingSourceObject: {fileID: 8025630091765411504, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4175417638142316883}
     - targetCorrespondingSourceObject: {fileID: -3452667408653277895, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4096599692610417908}
+    - targetCorrespondingSourceObject: {fileID: -3452667408653277895, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1798726495456674655}
     - targetCorrespondingSourceObject: {fileID: -5887055831220083389, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4751416657834835507}
@@ -238,11 +253,43 @@ MonoBehaviour:
   East: {fileID: 0}
   West: {fileID: 0}
   DoorN: {fileID: 0}
-  DoorS: {fileID: 0}
-  DoorE: {fileID: 0}
-  DoorW: {fileID: 0}
+  DoorS: {fileID: 3437898309093993725}
+  DoorE: {fileID: 4573792051762200679}
+  DoorW: {fileID: 8597495917333744725}
   RoomDefinition: {fileID: 11400000, guid: 3add0577443db3843af8ad31d7699c7e, type: 2}
   Rotation: 0
+--- !u!114 &5547413307092203658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625055531188904728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.13333334
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 0ae9533f02da6a2489efb9c2245edd9a, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!4 &4108717035660523938 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
@@ -300,6 +347,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.625, y: 1.880097, z: 0.625}
   m_Center: {x: 0, y: 0.9400485, z: 0}
+--- !u!114 &2151237887549615217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4773165879346796747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &4943620239646524467 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8796908271945996922, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
@@ -326,6 +390,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.625, y: 1.8693966, z: 0.625}
   m_Center: {x: 0, y: 0.9346983, z: 0}
+--- !u!114 &622856174197998690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4943620239646524467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &5904048783846912249 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8025630091765411504, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
@@ -352,6 +433,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.625, y: 1.8602153, z: 0.625}
   m_Center: {x: 0, y: 0.93010765, z: 0}
+--- !u!114 &4175417638142316883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5904048783846912249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &7969691654237879152 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -3452667408653277895, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
@@ -378,6 +476,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.625, y: 1.8727437, z: 0.625}
   m_Center: {x: 0, y: 0.93637186, z: 0}
+--- !u!114 &1798726495456674655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7969691654237879152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &8597495917333744725 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -3900167986889764324, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}

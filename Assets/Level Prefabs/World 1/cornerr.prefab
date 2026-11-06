@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1290448475884956730}
   - component: {fileID: 4506512850412464961}
+  - component: {fileID: 1498440584023198363}
   m_Layer: 0
   m_Name: cornerr
   m_TagString: Untagged
@@ -178,9 +179,41 @@ MonoBehaviour:
   DoorN: {fileID: 0}
   DoorS: {fileID: 0}
   DoorE: {fileID: 0}
-  DoorW: {fileID: 0}
+  DoorW: {fileID: 7062969951073131942}
   RoomDefinition: {fileID: 11400000, guid: a034bc606965fd446be2e312adde002f, type: 2}
   Rotation: 0
+--- !u!114 &1498440584023198363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919457725278942848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.13333334
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: b005ee93c016c0a40b31b676e02a4e7c, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &2103627215577475297
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,6 +316,7 @@ GameObject:
   - component: {fileID: 582757975269776418}
   - component: {fileID: 2579663434322502705}
   - component: {fileID: 1231114988762631584}
+  - component: {fileID: 346531106295868873}
   m_Layer: 0
   m_Name: carmain_1
   m_TagString: Untagged
@@ -383,6 +417,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.375, y: 0.34375, z: 0.76562494}
   m_Center: {x: 0.0000000013795216, y: 0.15625, z: -0.082812496}
+--- !u!114 &346531106295868873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2157279056792691881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &2468320282782457478
 GameObject:
   m_ObjectHideFlags: 0
@@ -875,6 +926,7 @@ GameObject:
   - component: {fileID: 4699005720410963641}
   - component: {fileID: 8487653733014998608}
   - component: {fileID: 7844945825991914314}
+  - component: {fileID: 8284611504214915060}
   m_Layer: 0
   m_Name: carmain
   m_TagString: Untagged
@@ -975,6 +1027,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.375, y: 0.34375, z: 0.765625}
   m_Center: {x: 0, y: 0.15625001, z: -0.0828125}
+--- !u!114 &8284611504214915060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4305711766920377137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &4405839801977398942
 GameObject:
   m_ObjectHideFlags: 0
@@ -1176,6 +1245,7 @@ GameObject:
   - component: {fileID: 5805020415781277201}
   - component: {fileID: 7993400042217321743}
   - component: {fileID: 2819452914159847989}
+  - component: {fileID: 1111095099057200666}
   m_Layer: 0
   m_Name: carmain_2
   m_TagString: Untagged
@@ -1276,6 +1346,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.375, y: 0.34375, z: 0.765625}
   m_Center: {x: -2.3433748e-33, y: 0.15625, z: -0.0828125}
+--- !u!114 &1111095099057200666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5519430682682004735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.84, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &6827703227258292124
 GameObject:
   m_ObjectHideFlags: 0
@@ -1438,6 +1525,7 @@ GameObject:
   - component: {fileID: 1463900762254529465}
   - component: {fileID: 201629718128380607}
   - component: {fileID: 2304055016233679497}
+  - component: {fileID: 931963689928045372}
   m_Layer: 0
   m_Name: floormain
   m_TagString: Untagged
@@ -1580,6 +1668,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3, y: 2.368216, z: 0.020586967}
   m_Center: {x: 0, y: 0.809108, z: 1.4897065}
+--- !u!114 &931963689928045372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7934663516324227735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e95dc5ff2b64380880dd7ac5922847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
+  m_SerializedVersion: 0
+  m_Size: {x: 0.9422561, y: 3, z: 4}
+  m_Center: {x: 1.528872, y: 1, z: 0}
+  m_Area: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &8125955950802244656
 GameObject:
   m_ObjectHideFlags: 0
