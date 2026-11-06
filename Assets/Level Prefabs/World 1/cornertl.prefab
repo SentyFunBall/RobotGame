@@ -75,15 +75,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -56.32016
+      value: -9.07692
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 16.59995
+      value: 27.30548
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 212.46318
+      value: 16.75016
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -281,7 +281,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.13333334
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 9afcbde0d5f3c8343ad3532421d0f3bb, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: b765086fbe5e64e43b0d693cd62f2336, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &2330769693455540934 stripped
 GameObject:

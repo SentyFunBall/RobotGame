@@ -55,7 +55,7 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
-  DoorN: {fileID: 0}
+  DoorN: {fileID: 6908381280002150851}
   DoorS: {fileID: 0}
   DoorE: {fileID: 0}
   DoorW: {fileID: 0}
@@ -91,7 +91,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.13333334
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: e5b495a6e0886b3489d41cefca0a98f3, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 3e1a7f34aca22a645a145e3f162352b6, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &1268255367536523923
 GameObject:
@@ -121,7 +121,7 @@ Transform:
   m_GameObject: {fileID: 1268255367536523923}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 1.5625, y: 0, z: 3}
+  m_LocalPosition: {x: 1.563, y: 0, z: 1.502}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -569,7 +569,7 @@ Transform:
   m_GameObject: {fileID: 1886724595951249840}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -2.1875, y: 0, z: 3}
+  m_LocalPosition: {x: -2.187, y: 0, z: 1.502}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -771,7 +771,7 @@ Transform:
   m_GameObject: {fileID: 3307664829494844907}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -2.1875, y: 0, z: 0}
+  m_LocalPosition: {x: -2.187, y: 0, z: -1.498}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1696,7 +1696,7 @@ Transform:
   m_GameObject: {fileID: 9097852084120904487}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 1.5625, y: 0, z: 0}
+  m_LocalPosition: {x: 1.563, y: 0, z: -1.498}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

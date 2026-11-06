@@ -1092,7 +1092,7 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
-  DoorN: {fileID: 0}
+  DoorN: {fileID: 1672749207748574583}
   DoorS: {fileID: 0}
   DoorE: {fileID: 6778339749278887235}
   DoorW: {fileID: 0}
@@ -1128,7 +1128,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.13333334
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 426b3bd2a90c3b74fbd2596e384782d0, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: d1ff3ba49f8f32447ac3d5fe84a18f80, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &3394134594940711450
 GameObject:

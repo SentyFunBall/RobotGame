@@ -75,15 +75,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -49.96046
+      value: -8.32828
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.79773
+      value: 21.03187
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 236.69704
+      value: 15.29089
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalRotation.w
@@ -252,7 +252,7 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
-  DoorN: {fileID: 0}
+  DoorN: {fileID: 4966598773887557857}
   DoorS: {fileID: 3437898309093993725}
   DoorE: {fileID: 4573792051762200679}
   DoorW: {fileID: 8597495917333744725}

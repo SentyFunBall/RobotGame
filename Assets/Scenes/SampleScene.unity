@@ -418,7 +418,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachCameraToPlayer
   playerObj: {fileID: 58895665}
-  posOff: {x: 0, y: 13.5, z: -6.8}
+  posOff: {x: 0, y: 11.5, z: -6.8}
   rotOff: {x: 63.4, y: 0, z: 0}
   smoothFactor: 0.125
 --- !u!114 &330585549
@@ -3069,7 +3069,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2e128454af5bfc41b1a9cf0e45f88e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  navMeshSurface: {fileID: 1955515129}
   enemyPrefabs:
   - {fileID: 4710264686728733128, guid: 0948dd00a4bdf624793b8e70fd063ab7, type: 3}
 --- !u!114 &1955515129

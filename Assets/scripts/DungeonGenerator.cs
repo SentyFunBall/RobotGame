@@ -83,7 +83,7 @@ public class DungeonGenerator : MonoBehaviour
             Difficulty.EnemyStrength = 5;
             Difficulty.PuzzleComplexity = 5;
             Difficulty.TrapFrequency = 5;
-            Difficulty.Size = 50;
+            Difficulty.Size = 10;
             Difficulty.RoomCount = 15;
             break;
 
@@ -91,7 +91,7 @@ public class DungeonGenerator : MonoBehaviour
             Difficulty.EnemyStrength = 45;
             Difficulty.PuzzleComplexity = 45;
             Difficulty.TrapFrequency = 45;
-            Difficulty.Size = 50;
+            Difficulty.Size = 10;
             Difficulty.RoomCount = 35;
             break;
 
@@ -100,7 +100,7 @@ public class DungeonGenerator : MonoBehaviour
             Difficulty.EnemyStrength = 25;
             Difficulty.PuzzleComplexity = 25;
             Difficulty.TrapFrequency = 25;
-            Difficulty.Size = 50;
+            Difficulty.Size = 10;
             Difficulty.RoomCount = 25;
             break;
         }
@@ -538,8 +538,8 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
 
-        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
-        StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
+        //StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
+        //StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
 
         //MovePlayerToStart();
         stopwatch.Stop();
