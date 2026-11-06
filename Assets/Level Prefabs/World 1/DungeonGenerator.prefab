@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6462631502958609099
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8210849616483783966}
+  - component: {fileID: 12024080088310658}
+  - component: {fileID: 2963013905793896106}
+  m_Layer: 0
+  m_Name: DungeonGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8210849616483783966
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462631502958609099}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &12024080088310658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462631502958609099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd0150732bf04934a8fae4f8daab7f70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  Difficulty:
+    EnemyStrength: 0
+    PuzzleComplexity: 0
+    TrapFrequency: 0
+    Size: 10
+    RoomCount: 20
+    numberOfEnemies: 5
+  navMesh: {fileID: 0}
+  allRooms:
+  - {fileID: 497064308611172353, guid: 7329904905bc0bf41be0898246be6870, type: 3}
+  - {fileID: 2789554495987910245, guid: ad36292ef1c653f41a3ee774eac29b7f, type: 3}
+  - {fileID: 1919457725278942848, guid: b52b392d7b469844e821b04e76e8e8ae, type: 3}
+  - {fileID: 2068024567870714091, guid: bce374d339ba90f49a4936ea16722080, type: 3}
+  - {fileID: 2489638639407657922, guid: e14e82becaf19644eb8c7696ebf16b7a, type: 3}
+  - {fileID: 3625055531188904728, guid: 54d5706206afb81429a4bb1bf2c2c0dd, type: 3}
+  - {fileID: 2739661650984017941, guid: 117c850042a685d4f8b6e98a915c04fb, type: 3}
+  - {fileID: 5805374244861709592, guid: 19194664d8136bd4aa6f23e41b2c46d9, type: 3}
+  - {fileID: 2855507758126022346, guid: a362597920189a24a8b79646a4a6086b, type: 3}
+  - {fileID: 6730103460246832427, guid: 1d6d5afe0a65f0444ab1c9948ab67874, type: 3}
+  - {fileID: 800460284945377154, guid: 76e26ad7822ca244aa41f7e721c8ac0e, type: 3}
+  SpreadWeight: 10.88
+--- !u!114 &2963013905793896106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462631502958609099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43a3f289ab70542428133d3b6d6025eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootGenerator
+  lootSpawnChance: 1
+  maxLootInDungeon: 100
+  minLootInDungeon: 10
+  lootPrefab: {fileID: 9085376655905517556, guid: 7ae8afebc6aae4ba0bfcd527376ebfc3, type: 3}

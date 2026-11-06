@@ -7,16 +7,12 @@ using static SpawnUtility;
 public class GenerateNavMesh : MonoBehaviour
 {
     [SerializeField]
-    private NavMeshSurface navMeshSurface;
-
-    [SerializeField]
     private List<GameObject> enemyPrefabs = new();
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public IEnumerator Bake()
     {
         yield return null;
-        navMeshSurface.BuildNavMesh();
     }
 
     public IEnumerator SpawnEnemies()
