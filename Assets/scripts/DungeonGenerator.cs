@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using Unity.AI.Navigation;
-using UnityEditor;
 using UnityEngine;
 
 
@@ -39,28 +37,22 @@ public class DungeonGenerator : MonoBehaviour
 {
     public static DungeonGenerator Instance { get; private set; }
 
-    public DungeonDifficulty Difficulty = new DungeonDifficulty();
+    public DungeonDifficulty Difficulty = new();
     public static Dictionary<Vector3Int, DungeonRoom> rooms = new();
-    public static List<OpenConnection> openConnections = new List<OpenConnection>();
+    public static List<OpenConnection> openConnections = new();
 
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
     private static GameObject player;
     private bool hasWon;
     [SerializeField] private GameObject robotBossPrefab;
+    private static List<Vector3Int> occupiedPositions = new();
 
     [SerializeField]
     private GameObject navMesh;
 
     [SerializeField]
-    private List<GameObject> allRooms = new List<GameObject>();
-
-    [Tooltip(
-        "Weight that determines how much the dungeon spreads out. Higher values result in more spread."
-    )]
-    [SerializeField]
-    [Range(0.1f, 15.0f)]
-    private float SpreadWeight = 1.0f;
+    private List<GameObject> allRooms = new();
 
     private void Awake()
     {
@@ -83,32 +75,38 @@ public class DungeonGenerator : MonoBehaviour
         switch (difficultyName)
         {
             case "Easy":
-            Difficulty.EnemyStrength = 5;
-            Difficulty.PuzzleComplexity = 5;
-            Difficulty.TrapFrequency = 5;
-            Difficulty.Size = 10;
-            Difficulty.RoomCount = 15;
-            break;
+                Difficulty.EnemyStrength = 5;
+                Difficulty.PuzzleComplexity = 5;
+                Difficulty.TrapFrequency = 5;
+                Difficulty.Size = 10;
+                Difficulty.RoomCount = 15;
+                break;
 
             case "Hard":
-            Difficulty.EnemyStrength = 45;
-            Difficulty.PuzzleComplexity = 45;
-            Difficulty.TrapFrequency = 45;
-            Difficulty.Size = 16;
-            Difficulty.RoomCount = 35;
-            break;
+                Difficulty.EnemyStrength = 45;
+                Difficulty.PuzzleComplexity = 45;
+                Difficulty.TrapFrequency = 45;
+                Difficulty.Size = 10;
+                Difficulty.RoomCount = 35;
+                break;
 
             case "Medium":
             default:
-            Difficulty.EnemyStrength = 25;
-            Difficulty.PuzzleComplexity = 25;
-            Difficulty.TrapFrequency = 25;
-            Difficulty.Size = 13;
-            Difficulty.RoomCount = 25;
-            break;
+                Difficulty.EnemyStrength = 25;
+                Difficulty.PuzzleComplexity = 25;
+                Difficulty.TrapFrequency = 25;
+                Difficulty.Size = 10;
+                Difficulty.RoomCount = 25;
+                break;
         }
     }
-    private DungeonRoom CreateRoom(GameObject prefab, int rotation, Vector3Int position)
+
+    private DungeonRoom CreateRoom(
+        GameObject prefab,
+        int rotation,
+        Vector3Int position,
+        RoomConnections required
+    )
     {
         if (IsPositionOccupied(position))
             return null;
@@ -123,27 +121,80 @@ public class DungeonGenerator : MonoBehaviour
         room.GridPosition = position;
         room.Rotation = rotation;
 
-        // fill in neighbors
+        // Only set neighbor links if that connection direction was explicitly required
+        // by the already-placed neighbors. This prevents accidental connections in
+        // directions we didn't plan for, which would cause misaligned doors and traversability issues.
         if (
-            rooms.TryGetValue(position + Vector3Int.forward * Difficulty.Size, out room.North)
-            && room.North != null
+            rooms.TryGetValue(
+                position + Vector3Int.forward * Difficulty.Size,
+                out DungeonRoom northNeighbor
+            )
         )
-            room.North.South = room;
+        {
+            if (
+                northNeighbor != null
+                && (required & RoomConnections.North) != 0
+                && CanConnectInDirection(room, northNeighbor, RoomConnections.North)
+            )
+            {
+                room.North = northNeighbor;
+                northNeighbor.South = room;
+            }
+        }
+
         if (
-            rooms.TryGetValue(position + Vector3Int.back * Difficulty.Size, out room.South)
-            && room.South != null
+            rooms.TryGetValue(
+                position + Vector3Int.back * Difficulty.Size,
+                out DungeonRoom southNeighbor
+            )
         )
-            room.South.North = room;
+        {
+            if (
+                southNeighbor != null
+                && (required & RoomConnections.South) != 0
+                && CanConnectInDirection(room, southNeighbor, RoomConnections.South)
+            )
+            {
+                room.South = southNeighbor;
+                southNeighbor.North = room;
+            }
+        }
+
         if (
-            rooms.TryGetValue(position + Vector3Int.right * Difficulty.Size, out room.East)
-            && room.East != null
+            rooms.TryGetValue(
+                position + Vector3Int.right * Difficulty.Size,
+                out DungeonRoom eastNeighbor
+            )
         )
-            room.East.West = room;
+        {
+            if (
+                eastNeighbor != null
+                && (required & RoomConnections.East) != 0
+                && CanConnectInDirection(room, eastNeighbor, RoomConnections.East)
+            )
+            {
+                room.East = eastNeighbor;
+                eastNeighbor.West = room;
+            }
+        }
+
         if (
-            rooms.TryGetValue(position + Vector3Int.left * Difficulty.Size, out room.West)
-            && room.West != null
+            rooms.TryGetValue(
+                position + Vector3Int.left * Difficulty.Size,
+                out DungeonRoom westNeighbor
+            )
         )
-            room.West.East = room;
+        {
+            if (
+                westNeighbor != null
+                && (required & RoomConnections.West) != 0
+                && CanConnectInDirection(room, westNeighbor, RoomConnections.West)
+            )
+            {
+                room.West = westNeighbor;
+                westNeighbor.East = room;
+            }
+        }
 
         room.UpdateWalls();
         if (room.North != null)
@@ -158,85 +209,106 @@ public class DungeonGenerator : MonoBehaviour
         return room;
     }
 
-    private Vector3Int PickOpenConnection(List<OpenConnection> openConnections)
+    private bool CanConnectInDirection(
+        DungeonRoom room,
+        DungeonRoom neighbor,
+        RoomConnections direction
+    )
     {
-        float totalWeight = 0f;
-        foreach (OpenConnection connection in openConnections)
-        {
-            DungeonRoom room;
-            rooms.TryGetValue(connection.Position, out room);
-            totalWeight += Weight(connection.SourceRoom);
-        }
+        // Check if this room can connect in the given direction
+        RoomConnections roomConnections = RoomDefinition.RotateConnections(
+            room.RoomDefinition.Connections,
+            room.Rotation,
+            room.RoomDefinition
+        );
 
-        float roll = Random.Range(0f, totalWeight);
+        if ((roomConnections & direction) == 0)
+            return false;
 
-        foreach (OpenConnection connection in openConnections)
-        {
-            DungeonRoom room;
-            rooms.TryGetValue(connection.Position, out room);
-            roll -= Weight(connection.SourceRoom);
-            if (roll <= 0f)
-                return connection.Position;
-        }
+        // Check if neighbor can connect in the opposite direction
+        RoomConnections opposite = RoomDefinition.Opposite(direction);
+        RoomConnections neighborConnections = RoomDefinition.RotateConnections(
+            neighbor.RoomDefinition.Connections,
+            neighbor.Rotation,
+            neighbor.RoomDefinition
+        );
 
-        // Fallback in case of rounding errors
-        return openConnections[^1].Position;
+        return (neighborConnections & opposite) != 0;
     }
 
     private struct RoomPlacement
     {
         public GameObject Prefab;
         public int Rotation;
+        public RoomConnections Connections;
     }
 
-    // Picks a room definition (and rotation) that satisfies whatever connections are
-    // required by already-placed neighbors around the given position.
-    private RoomPlacement? PickCompatibleRoom(
-        Vector3Int position,
-        RoomType requiredType = RoomType.None
+    private struct GridDirection
+    {
+        public Vector3Int Offset;
+        public RoomConnections Connection;
+
+        public GridDirection(Vector3Int offset, RoomConnections connection)
+        {
+            Offset = offset;
+            Connection = connection;
+        }
+    }
+
+    private static readonly GridDirection[] GridDirections =
+    {
+        new GridDirection(Vector3Int.forward, RoomConnections.North),
+        new GridDirection(Vector3Int.back, RoomConnections.South),
+        new GridDirection(Vector3Int.right, RoomConnections.East),
+        new GridDirection(Vector3Int.left, RoomConnections.West),
+    };
+
+    private List<RoomPlacement> GetRoomCandidates(
+        RoomType requiredType,
+        RoomConnections required,
+        RoomConnections forbidden
     )
     {
-        RoomConnections required = RoomConnections.None;
-        RoomConnections forbidden = RoomConnections.None;
-
-        CollectDirectionConstraints(
-            position + Vector3Int.forward * Difficulty.Size,
-            RoomConnections.North,
-            ref required,
-            ref forbidden
-        );
-        CollectDirectionConstraints(
-            position + Vector3Int.back * Difficulty.Size,
-            RoomConnections.South,
-            ref required,
-            ref forbidden
-        );
-        CollectDirectionConstraints(
-            position + Vector3Int.right * Difficulty.Size,
-            RoomConnections.East,
-            ref required,
-            ref forbidden
-        );
-        CollectDirectionConstraints(
-            position + Vector3Int.left * Difficulty.Size,
-            RoomConnections.West,
-            ref required,
-            ref forbidden
-        );
-
         List<RoomPlacement> candidates = new List<RoomPlacement>();
         foreach (GameObject prefabObject in allRooms)
         {
             if (prefabObject == null)
                 continue;
 
-            RoomDefinition definition = prefabObject.GetComponent<DungeonRoom>().RoomDefinition;
-            if (definition == null)
+            DungeonRoom prefabRoom = prefabObject.GetComponent<DungeonRoom>();
+            if (prefabRoom == null)
+            {
+                UnityEngine.Debug.LogError($"Room prefab {prefabObject.name} has no DungeonRoom.");
                 continue;
+            }
+
+            RoomDefinition definition = prefabRoom.RoomDefinition;
+            if (definition == null)
+            {
+                UnityEngine.Debug.LogError($"Room prefab {prefabObject.name} has no RoomDefinition.");
+                continue;
+            }
+
             if (requiredType != RoomType.None && (definition.Type & requiredType) != requiredType)
                 continue;
 
-            for (int rotation = 0; rotation < 4; rotation++)
+            bool isStartRoom = (definition.Type & RoomType.Start) != 0;
+            bool isEndRoom = (definition.Type & RoomType.End) != 0;
+            if (isStartRoom && isEndRoom)
+            {
+                UnityEngine.Debug.LogError(
+                    "Room " + prefabObject.name + " cannot be both Start and End type."
+                );
+                continue;
+            }
+
+            if (isStartRoom && requiredType != RoomType.Start)
+                continue;
+            if (isEndRoom && requiredType != RoomType.End)
+                continue;
+
+            int rotationCount = definition.CanRotate ? 4 : 1;
+            for (int rotation = 0; rotation < rotationCount; rotation++)
             {
                 RoomConnections rotated = RoomDefinition.RotateConnections(
                     definition.Connections,
@@ -248,14 +320,23 @@ public class DungeonGenerator : MonoBehaviour
                 if ((rotated & forbidden) != 0)
                     continue;
 
-                candidates.Add(new RoomPlacement { Prefab = prefabObject, Rotation = rotation });
+                candidates.Add(
+                    new RoomPlacement
+                    {
+                        Prefab = prefabObject,
+                        Rotation = rotation,
+                        Connections = rotated,
+                    }
+                );
             }
         }
 
-        if (candidates.Count == 0)
-            return null;
-
-        return candidates[Random.Range(0, candidates.Count)];
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int randomIndex = Random.Range(0, i + 1);
+            (candidates[i], candidates[randomIndex]) = (candidates[randomIndex], candidates[i]);
+        }
+        return candidates;
     }
 
     // Determines whether the given direction from the room being placed is required
@@ -271,7 +352,14 @@ public class DungeonGenerator : MonoBehaviour
         if (!rooms.TryGetValue(neighborPosition, out DungeonRoom neighbor) || neighbor == null)
             return;
 
-        if (neighbor.CanConnect(RoomDefinition.Opposite(direction)))
+        RoomConnections opposite = RoomDefinition.Opposite(direction);
+        RoomConnections neighborConnections = RoomDefinition.RotateConnections(
+            neighbor.RoomDefinition.Connections,
+            neighbor.Rotation,
+            neighbor.RoomDefinition
+        );
+
+        if ((neighborConnections & opposite) != 0)
             required |= direction;
         else
             forbidden |= direction;
@@ -282,172 +370,238 @@ public class DungeonGenerator : MonoBehaviour
         return rooms.ContainsKey(position);
     }
 
-    private void AddOpenConnections(DungeonRoom room)
+    private List<Vector3Int> GenerateLayout()
     {
-        // Only frontier in directions where the room actually has a door - an empty
-        // neighboring tile isn't a valid expansion point if there's no connection to it.
-        if (
-            room.North == null
-            && room.CanConnect(RoomConnections.North)
-            && !IsPositionOccupied(room.GridPosition + Vector3Int.forward * Difficulty.Size)
-        )
-            openConnections.Add(
-                new OpenConnection
-                {
-                    Position = room.GridPosition + Vector3Int.forward * Difficulty.Size,
-                    SourceRoom = room,
-                }
-            );
-        if (
-            room.South == null
-            && room.CanConnect(RoomConnections.South)
-            && !IsPositionOccupied(room.GridPosition + Vector3Int.back * Difficulty.Size)
-        )
-            openConnections.Add(
-                new OpenConnection
-                {
-                    Position = room.GridPosition + Vector3Int.back * Difficulty.Size,
-                    SourceRoom = room,
-                }
-            );
-        if (
-            room.East == null
-            && room.CanConnect(RoomConnections.East)
-            && !IsPositionOccupied(room.GridPosition + Vector3Int.right * Difficulty.Size)
-        )
-            openConnections.Add(
-                new OpenConnection
-                {
-                    Position = room.GridPosition + Vector3Int.right * Difficulty.Size,
-                    SourceRoom = room,
-                }
-            );
-        if (
-            room.West == null
-            && room.CanConnect(RoomConnections.West)
-            && !IsPositionOccupied(room.GridPosition + Vector3Int.left * Difficulty.Size)
-        )
-            openConnections.Add(
-                new OpenConnection
-                {
-                    Position = room.GridPosition + Vector3Int.left * Difficulty.Size,
-                    SourceRoom = room,
-                }
-            );
-        /*if (room.Up == null)
-            openConnections.Add(room.GridPosition + Vector3Int.up * Difficulty.Size);
-        if (room.Down == null)
-            openConnections.Add(room.GridPosition + Vector3Int.down * Difficulty.Size);*/
-    }
+        // Build the connected topology, just track positions, not actual rooms yet.
+        // Rooms will be populated later.
+        List<Vector3Int> layoutPositions = new List<Vector3Int>();
+        List<Vector3Int> frontier = new List<Vector3Int>();
 
-    private int GetNeighborCount(DungeonRoom room)
-    {
-        int count = 0;
-        if (IsPositionOccupied(room.GridPosition + Vector3Int.forward * Difficulty.Size))
-            count++;
-        if (IsPositionOccupied(room.GridPosition + Vector3Int.back * Difficulty.Size))
-            count++;
-        if (IsPositionOccupied(room.GridPosition + Vector3Int.right * Difficulty.Size))
-            count++;
-        if (IsPositionOccupied(room.GridPosition + Vector3Int.left * Difficulty.Size))
-            count++;
-        /*if (IsPositionOccupied(room.GridPosition + Vector3Int.up * Difficulty.Size))
-            count++;
-        if (IsPositionOccupied(room.GridPosition + Vector3Int.down * Difficulty.Size))
-            count++;*/
-        return count;
-    }
+        layoutPositions.Add(Vector3Int.zero);
+        frontier.Add(Vector3Int.zero);
 
-    private float Weight(DungeonRoom room)
-    {
-        int neighbors = GetNeighborCount(room);
-        float baseWeight = Mathf.Max(0.01f, 4f - neighbors);
-        return Mathf.Pow(baseWeight, SpreadWeight);
-    }
-
-    private DungeonRoom GenerateLayout()
-    {
-        // Build the connected topology without requiring any special room type yet.
-        ClearRooms();
-        RoomPlacement? startPlacement = PickCompatibleRoom(Vector3Int.zero);
-        if (startPlacement == null)
+        while (layoutPositions.Count < Difficulty.RoomCount && frontier.Count > 0)
         {
-            UnityEngine.Debug.LogError("No compatible room found for the layout start.");
-            return null;
-        }
+            // Pick a random position from the frontier
+            Vector3Int current = frontier[Random.Range(0, frontier.Count)];
+            frontier.Remove(current);
 
-        DungeonRoom startingRoom = CreateRoom(
-            startPlacement.Value.Prefab,
-            startPlacement.Value.Rotation,
-            Vector3Int.zero
-        );
-        rooms.Add(startingRoom.GridPosition, startingRoom);
-        AddOpenConnections(rooms[startingRoom.GridPosition]);
-
-        while (rooms.Count < Difficulty.RoomCount && openConnections.Count > 0)
-        {
-            Vector3Int openConnection = PickOpenConnection(openConnections);
-            RoomPlacement? placement = PickCompatibleRoom(openConnection);
-
-            if (placement == null)
+            // Try to expand in random directions
+            Vector3Int[] directions =
             {
-                openConnections.RemoveAll(oc => oc.Position == openConnection);
-                continue;
+                Vector3Int.forward * Difficulty.Size,
+                Vector3Int.back * Difficulty.Size,
+                Vector3Int.right * Difficulty.Size,
+                Vector3Int.left * Difficulty.Size,
+            };
+
+            // Shuffle directions randomly
+            for (int i = directions.Length - 1; i > 0; i--)
+            {
+                int randomIndex = Random.Range(0, i + 1);
+                (directions[i], directions[randomIndex]) = (directions[randomIndex], directions[i]);
             }
 
-            DungeonRoom newRoom = CreateRoom(
-                placement.Value.Prefab,
-                placement.Value.Rotation,
-                openConnection
-            );
+            foreach (Vector3Int direction in directions)
+            {
+                if (layoutPositions.Count >= Difficulty.RoomCount)
+                    break;
 
-            rooms.Add(newRoom.GridPosition, newRoom);
-            openConnections.RemoveAll(oc => oc.Position == openConnection);
-            AddOpenConnections(newRoom);
+                Vector3Int newPosition = current + direction;
+
+                if (!layoutPositions.Contains(newPosition))
+                {
+                    layoutPositions.Add(newPosition);
+                    frontier.Add(newPosition);
+                }
+            }
         }
 
-        return startingRoom;
+        return layoutPositions;
     }
 
-    private bool PopulateRooms(Vector3Int startPosition, Vector3Int endPosition)
+    // A spanning tree makes every room reachable without requiring passages between
+    // every pair of adjacent rooms. Its leaves are suitable for start and end rooms.
+    private bool PlanConnections(
+        List<Vector3Int> layoutPositions,
+        out Dictionary<Vector3Int, RoomConnections> required,
+        out Vector3Int startPosition,
+        out Vector3Int endPosition
+    )
     {
-        Dictionary<Vector3Int, RoomPlacement> placements = new();
-        List<Vector3Int> positions = new(rooms.Keys);
+        required = new Dictionary<Vector3Int, RoomConnections>();
+        startPosition = Vector3Int.zero;
+        endPosition = Vector3Int.zero;
+        if (Difficulty.Size <= 0 || layoutPositions.Count < 2)
+            return false;
 
+        HashSet<Vector3Int> layout = new HashSet<Vector3Int>(layoutPositions);
+        if (layout.Count != layoutPositions.Count)
+            return false;
+
+        Queue<Vector3Int> frontier = new Queue<Vector3Int>();
+        frontier.Enqueue(layoutPositions[0]);
+        required.Add(layoutPositions[0], RoomConnections.None);
+        while (frontier.Count > 0)
+        {
+            Vector3Int position = frontier.Dequeue();
+            foreach (GridDirection direction in GridDirections)
+            {
+                Vector3Int neighbor = position + direction.Offset * Difficulty.Size;
+                if (!layout.Contains(neighbor) || required.ContainsKey(neighbor))
+                    continue;
+
+                required[position] |= direction.Connection;
+                required.Add(neighbor, RoomDefinition.Opposite(direction.Connection));
+                frontier.Enqueue(neighbor);
+            }
+        }
+
+        if (required.Count != layout.Count)
+            return false;
+
+        float maxDistance = -1f;
+        foreach (Vector3Int first in layoutPositions)
+        {
+            if (!HasSingleConnection(required[first]))
+                continue;
+            foreach (Vector3Int second in layoutPositions)
+            {
+                if (first == second || !HasSingleConnection(required[second]))
+                    continue;
+                float distance = (first - second).sqrMagnitude;
+                if (distance > maxDistance)
+                {
+                    maxDistance = distance;
+                    startPosition = first;
+                    endPosition = second;
+                }
+            }
+        }
+        return maxDistance >= 0f;
+    }
+
+    private static bool HasSingleConnection(RoomConnections connections)
+    {
+        int mask = (int)connections;
+        return mask != 0 && (mask & (mask - 1)) == 0;
+    }
+
+    private bool SolvePlacements(
+        List<Vector3Int> positions,
+        Dictionary<Vector3Int, List<RoomPlacement>> candidates,
+        Dictionary<Vector3Int, RoomPlacement> placements,
+        ref int attemptsRemaining
+    )
+    {
+        if (placements.Count == positions.Count)
+            return true;
+        if (attemptsRemaining <= 0)
+            return false;
+
+        Vector3Int bestPosition = Vector3Int.zero;
+        List<RoomPlacement> bestCandidates = null;
         foreach (Vector3Int position in positions)
         {
-            RoomType requiredType = RoomType.None;
-            if (position == startPosition)
-                requiredType = RoomType.Start;
-            else if (position == endPosition)
-                requiredType = RoomType.End;
+            if (placements.ContainsKey(position))
+                continue;
 
-            RoomPlacement? placement = PickCompatibleRoom(position, requiredType);
-            if (placement == null)
+            List<RoomPlacement> compatible = new List<RoomPlacement>();
+            foreach (RoomPlacement candidate in candidates[position])
             {
-                UnityEngine.Debug.LogError(
-                    $"No compatible room found at {position} for type {requiredType}."
-                );
-                return false;
+                bool matches = true;
+                foreach (GridDirection direction in GridDirections)
+                {
+                    Vector3Int neighbor = position + direction.Offset * Difficulty.Size;
+                    if (!placements.TryGetValue(neighbor, out RoomPlacement neighborPlacement))
+                        continue;
+
+                    bool opensHere = (candidate.Connections & direction.Connection) != 0;
+                    bool opensThere = (
+                        neighborPlacement.Connections & RoomDefinition.Opposite(direction.Connection)
+                    ) != 0;
+                    if (opensHere != opensThere)
+                    {
+                        matches = false;
+                        break;
+                    }
+                }
+                if (matches)
+                    compatible.Add(candidate);
             }
 
-            placements.Add(position, placement.Value);
+            if (compatible.Count == 0)
+                return false;
+            if (bestCandidates == null || compatible.Count < bestCandidates.Count)
+            {
+                bestPosition = position;
+                bestCandidates = compatible;
+            }
         }
 
-        foreach (DungeonRoom room in rooms.Values)
-            Destroy(room.gameObject);
-
-        rooms.Clear();
-        openConnections.Clear();
-
-        foreach (KeyValuePair<Vector3Int, RoomPlacement> placement in placements)
+        foreach (RoomPlacement candidate in bestCandidates)
         {
-            DungeonRoom room = CreateRoom(
-                placement.Value.Prefab,
-                placement.Value.Rotation,
-                placement.Key
-            );
-            rooms.Add(placement.Key, room);
+            if (attemptsRemaining-- <= 0)
+                return false;
+            placements.Add(bestPosition, candidate);
+            if (SolvePlacements(positions, candidates, placements, ref attemptsRemaining))
+                return true;
+            placements.Remove(bestPosition);
+        }
+        return false;
+    }
+
+    private bool PopulateRooms(List<Vector3Int> layoutPositions)
+    {
+        if (!PlanConnections(layoutPositions, out var required, out var startPosition, out var endPosition))
+        {
+            UnityEngine.Debug.LogWarning("Cannot build a connected room layout with a start and end.");
+            return false;
+        }
+
+        HashSet<Vector3Int> layout = new HashSet<Vector3Int>(layoutPositions);
+        Dictionary<Vector3Int, List<RoomPlacement>> candidates = new Dictionary<Vector3Int, List<RoomPlacement>>();
+        foreach (Vector3Int position in layoutPositions)
+        {
+            RoomType type = position == startPosition ? RoomType.Start
+                : position == endPosition ? RoomType.End : RoomType.None;
+            RoomConnections forbidden = RoomConnections.None;
+            if (type != RoomType.None)
+            {
+                foreach (GridDirection direction in GridDirections)
+                {
+                    Vector3Int neighbor = position + direction.Offset * Difficulty.Size;
+                    if (layout.Contains(neighbor) && (required[position] & direction.Connection) == 0)
+                        forbidden |= direction.Connection;
+                }
+            }
+            candidates.Add(position, GetRoomCandidates(type, required[position], forbidden));
+        }
+
+        Dictionary<Vector3Int, RoomPlacement> placements = new Dictionary<Vector3Int, RoomPlacement>();
+        int attemptsRemaining = 20000;
+        if (!SolvePlacements(layoutPositions, candidates, placements, ref attemptsRemaining))
+        {
+            UnityEngine.Debug.LogWarning("Could not find compatible rotations for the connected room layout.");
+            return false;
+        }
+
+        foreach (Vector3Int position in layoutPositions)
+        {
+            RoomConnections existingConnections = RoomConnections.None;
+            RoomConnections forbidden = RoomConnections.None;
+            foreach (GridDirection direction in GridDirections)
+            {
+                CollectDirectionConstraints(
+                    position + direction.Offset * Difficulty.Size,
+                    direction.Connection,
+                    ref existingConnections,
+                    ref forbidden
+                );
+            }
+            RoomPlacement placement = placements[position];
+            DungeonRoom room = CreateRoom(placement.Prefab, placement.Rotation, position, existingConnections);
+            rooms.Add(position, room);
         }
 
         startRoom = rooms[startPosition];
@@ -481,20 +635,17 @@ public class DungeonGenerator : MonoBehaviour
         startRoom = null;
         endRoom = null;
         hasWon = false;
+        ClearRooms();
 
-        DungeonRoom layoutRoot = GenerateLayout();
-        if (layoutRoot == null)
-            return false;
-
-        // Choose endpoints from the completed topology before assigning room types.
-        var (layoutStart, layoutEnd, _) = BFS.FindFurthestPair(layoutRoot);
-        if (layoutStart == null || layoutEnd == null)
+        // Generate just a list of positions
+        List<Vector3Int> layoutPositions = GenerateLayout();
+        if (layoutPositions.Count == 0)
         {
-            UnityEngine.Debug.LogWarning("Could not find furthest rooms for the dungeon.");
+            UnityEngine.Debug.LogError("Failed to generate layout positions.");
             return false;
         }
 
-        if (!PopulateRooms(layoutStart.GridPosition, layoutEnd.GridPosition))
+        if (!PopulateRooms(layoutPositions))
         {
             UnityEngine.Debug.LogWarning("Could not populate the dungeon with compatible rooms.");
             return false;
@@ -516,9 +667,22 @@ public class DungeonGenerator : MonoBehaviour
         }
         rooms.Clear();
         openConnections.Clear();
+        occupiedPositions.Clear();
+        startRoom = null;
+        endRoom = null;
     }
 
     public void GenerateDungeon()
+    {
+        GenerateDungeonInternal(spawnEnemiesAndLoot: true);
+    }
+
+    public void GenerateDungeonEditorMode()
+    {
+        GenerateDungeonInternal(spawnEnemiesAndLoot: false);
+    }
+
+    private void GenerateDungeonInternal(bool spawnEnemiesAndLoot)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -539,11 +703,13 @@ public class DungeonGenerator : MonoBehaviour
             UnityEngine.Debug.LogError($"Dungeon generation failed after {maxAttempts} attempts.");
             return;
         }
-
-        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
-        StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
-        SpawnBoss();
-        StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
+        if (spawnEnemiesAndLoot)
+        {
+            StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
+            StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
+            SpawnBoss();
+            StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
+        }
 
         //MovePlayerToStart();
         stopwatch.Stop();
@@ -552,10 +718,7 @@ public class DungeonGenerator : MonoBehaviour
 
     public void ResetDungeon()
     {
-        openConnections.Clear();
-        rooms.Clear();
-        startRoom = null;
-        endRoom = null;
+        ClearRooms();
     }
 
     void OnEnable()
