@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 [System.Serializable]
@@ -46,6 +47,13 @@ public class DungeonGenerator : MonoBehaviour
 
     [SerializeField]
     private GameObject navMesh;
+
+    [SerializeField]
+    private float navMeshLinkWidth = 3f;
+
+    // Distance each link endpoint sits from the shared doorway, so both land on room navmeshes.
+    [SerializeField]
+    private float navMeshLinkReach = 1.5f;
 
     [SerializeField]
     private List<GameObject> allRooms = new();
@@ -642,7 +650,46 @@ public class DungeonGenerator : MonoBehaviour
         endRoom = rooms[endPosition];
         startRoom.gameObject.name += " (Start)";
         endRoom.gameObject.name += " (End)";
+        ConnectNavMeshLinks();
         return true;
+    }
+
+    // Each room carries its own NavMeshSurface, so adjacent rooms need a NavMeshLink across
+    // the shared doorway for agents to path between them. Only North/East are visited so
+    // every connected pair gets exactly one bidirectional link.
+    private void ConnectNavMeshLinks()
+    {
+        foreach (DungeonRoom room in rooms.Values)
+        {
+            if (room == null)
+                continue;
+
+            // Only check North and East to avoid creating duplicate links for each pair of connected rooms.
+            if (room.North != null)
+                room.LinkNorth = CreateNavMeshLink(room, room.North, Vector3.forward);
+            if (room.East != null)
+                room.LinkEast = CreateNavMeshLink(room, room.East, Vector3.right);
+        }
+    }
+
+    private NavMeshLink CreateNavMeshLink(DungeonRoom from, DungeonRoom to, Vector3 direction)
+    {
+        Vector3 midpoint = (from.transform.position + to.transform.position) * 0.5f;
+
+        GameObject linkObject = new GameObject($"NavMeshLink {from.name} -> {to.name}");
+        linkObject.transform.SetPositionAndRotation(
+            midpoint,
+            Quaternion.LookRotation(direction, Vector3.up)
+        );
+        linkObject.transform.SetParent(from.transform, true);
+
+        NavMeshLink link = linkObject.AddComponent<NavMeshLink>();
+        link.startPoint = new Vector3(0, 0, -navMeshLinkReach);
+        link.endPoint = new Vector3(0, 0, navMeshLinkReach);
+        link.width = navMeshLinkWidth;
+        link.bidirectional = true;
+        link.UpdateLink();
+        return link;
     }
 
     private void MovePlayerToStart()
