@@ -15,7 +15,7 @@ public class DungeonDifficulty
     public int TrapFrequency;
 
     [Range(0, 100)]
-    public int Size = 10; // Default size of the dungeon (N x N)
+    public int Size = 12; // Default size of the dungeon (N x N)
 
     [Range(0, 250)]
     public int RoomCount = 50; // Default number of rooms in the dungeon
@@ -75,7 +75,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.EnemyStrength = 5;
                 Difficulty.PuzzleComplexity = 5;
                 Difficulty.TrapFrequency = 5;
-                Difficulty.Size = 10;
+                Difficulty.Size = 12;
                 Difficulty.RoomCount = 15;
                 break;
 
@@ -83,7 +83,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.EnemyStrength = 45;
                 Difficulty.PuzzleComplexity = 45;
                 Difficulty.TrapFrequency = 45;
-                Difficulty.Size = 10;
+                Difficulty.Size = 12;
                 Difficulty.RoomCount = 35;
                 break;
 
@@ -92,7 +92,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.EnemyStrength = 25;
                 Difficulty.PuzzleComplexity = 25;
                 Difficulty.TrapFrequency = 25;
-                Difficulty.Size = 10;
+                Difficulty.Size = 12;
                 Difficulty.RoomCount = 25;
                 break;
         }
@@ -731,24 +731,6 @@ public class DungeonGenerator : MonoBehaviour
 
     void Update()
     {
-        if (hasWon || endRoom == null)
-            return;
-
-        if (player == null)
-            player = GameObject.FindWithTag("Player");
-        if (player == null)
-            return;
-
-        // Rooms are centered on their grid position and spaced Size units apart
-        float halfSize = Difficulty.Size * 0.5f;
-        Vector3 offset = player.transform.position - endRoom.transform.position;
-        if (Mathf.Abs(offset.x) > halfSize || Mathf.Abs(offset.z) > halfSize)
-            return;
-
-        hasWon = true;
-        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
-        if (menus != null)
-            menus.ShowWinMenu();
     }
 
     public static DungeonRoom GetRandomRoom()

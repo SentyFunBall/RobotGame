@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour
     {
         // Since camera is tilted, W actually is forward + left, etc
         Vector3 desiredVelocity =
-            new Vector3(moveInput.x, 0.0f, moveInput.y).normalized
+            new Vector3(-moveInput.x, 0.0f, -moveInput.y).normalized
             * moveSpeed
             * (
                 isSlow ? slowMod

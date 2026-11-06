@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 139c5befa57ee7745b3f5c81affc6b14, type: 3}
   m_Name: Room-cornerr
   m_EditorClassIdentifier: Assembly-CSharp::RoomDefinition
-  Connections: 6
+  Connections: 9
   Type: 0
   Features: 0
+  CanRotate: 0

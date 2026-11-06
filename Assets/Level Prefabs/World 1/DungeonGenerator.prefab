@@ -49,7 +49,7 @@ MonoBehaviour:
     EnemyStrength: 0
     PuzzleComplexity: 0
     TrapFrequency: 0
-    Size: 10
+    Size: 12
     RoomCount: 20
     numberOfEnemies: 5
   navMesh: {fileID: 0}
@@ -60,12 +60,11 @@ MonoBehaviour:
   - {fileID: 2068024567870714091, guid: bce374d339ba90f49a4936ea16722080, type: 3}
   - {fileID: 2489638639407657922, guid: e14e82becaf19644eb8c7696ebf16b7a, type: 3}
   - {fileID: 3625055531188904728, guid: 54d5706206afb81429a4bb1bf2c2c0dd, type: 3}
-  - {fileID: 2739661650984017941, guid: 117c850042a685d4f8b6e98a915c04fb, type: 3}
-  - {fileID: 5805374244861709592, guid: 19194664d8136bd4aa6f23e41b2c46d9, type: 3}
-  - {fileID: 2855507758126022346, guid: a362597920189a24a8b79646a4a6086b, type: 3}
-  - {fileID: 6730103460246832427, guid: 1d6d5afe0a65f0444ab1c9948ab67874, type: 3}
+  - {fileID: 3513715671603033508, guid: 117c850042a685d4f8b6e98a915c04fb, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 619231232636994613, guid: 1d6d5afe0a65f0444ab1c9948ab67874, type: 3}
   - {fileID: 800460284945377154, guid: 76e26ad7822ca244aa41f7e721c8ac0e, type: 3}
-  SpreadWeight: 10.88
 --- !u!114 &2963013905793896106
 MonoBehaviour:
   m_ObjectHideFlags: 0
