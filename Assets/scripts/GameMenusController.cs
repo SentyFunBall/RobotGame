@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -94,5 +95,7 @@ public class GameMenusController : MonoBehaviour
     {
         winMenu.SetActive(true);
         Time.timeScale = 0f;
+        GameObject lootText = winMenu.transform.Find("loottx").gameObject;
+        lootText.GetComponent<TextMeshProUGUI>().text = "Loot Collected: " + PickupLoot.lootCount;
     }
 }

@@ -108,6 +108,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   groundCheckDistance: 0.05
+  attackRange: 5
+  attackDamage: 10
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 256
+  attackCooldown: 3
 --- !u!114 &812377548209013917
 MonoBehaviour:
   m_ObjectHideFlags: 0

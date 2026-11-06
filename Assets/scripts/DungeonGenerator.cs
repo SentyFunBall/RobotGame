@@ -42,7 +42,6 @@ public class DungeonGenerator : MonoBehaviour
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
     private static GameObject player;
-    private bool hasWon;
     private static List<Vector3Int> occupiedPositions = new();
 
     [SerializeField]
@@ -59,6 +58,17 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // Statics survive scene reloads and would hold destroyed rooms from the previous load
+        rooms.Clear();
+        openConnections.Clear();
+        occupiedPositions.Clear();
+        startRoom = null;
+        endRoom = null;
+        player = null;
+        LootGenerator.totalLootCount = 0;
+        PickupLoot.lootCount = 0;
+
         ApplyDifficulty(MenuControler.SelectedDifficulty);
     }
 
@@ -282,7 +292,9 @@ public class DungeonGenerator : MonoBehaviour
             RoomDefinition definition = prefabRoom.RoomDefinition;
             if (definition == null)
             {
-                UnityEngine.Debug.LogError($"Room prefab {prefabObject.name} has no RoomDefinition.");
+                UnityEngine.Debug.LogError(
+                    $"Room prefab {prefabObject.name} has no RoomDefinition."
+                );
                 continue;
             }
 
@@ -514,9 +526,11 @@ public class DungeonGenerator : MonoBehaviour
                         continue;
 
                     bool opensHere = (candidate.Connections & direction.Connection) != 0;
-                    bool opensThere = (
-                        neighborPlacement.Connections & RoomDefinition.Opposite(direction.Connection)
-                    ) != 0;
+                    bool opensThere =
+                        (
+                            neighborPlacement.Connections
+                            & RoomDefinition.Opposite(direction.Connection)
+                        ) != 0;
                     if (opensHere != opensThere)
                     {
                         matches = false;
@@ -550,36 +564,54 @@ public class DungeonGenerator : MonoBehaviour
 
     private bool PopulateRooms(List<Vector3Int> layoutPositions)
     {
-        if (!PlanConnections(layoutPositions, out var required, out var startPosition, out var endPosition))
+        if (
+            !PlanConnections(
+                layoutPositions,
+                out var required,
+                out var startPosition,
+                out var endPosition
+            )
+        )
         {
-            UnityEngine.Debug.LogWarning("Cannot build a connected room layout with a start and end.");
+            UnityEngine.Debug.LogWarning(
+                "Cannot build a connected room layout with a start and end."
+            );
             return false;
         }
 
         HashSet<Vector3Int> layout = new HashSet<Vector3Int>(layoutPositions);
-        Dictionary<Vector3Int, List<RoomPlacement>> candidates = new Dictionary<Vector3Int, List<RoomPlacement>>();
+        Dictionary<Vector3Int, List<RoomPlacement>> candidates =
+            new Dictionary<Vector3Int, List<RoomPlacement>>();
         foreach (Vector3Int position in layoutPositions)
         {
-            RoomType type = position == startPosition ? RoomType.Start
-                : position == endPosition ? RoomType.End : RoomType.None;
+            RoomType type =
+                position == startPosition ? RoomType.Start
+                : position == endPosition ? RoomType.End
+                : RoomType.None;
             RoomConnections forbidden = RoomConnections.None;
             if (type != RoomType.None)
             {
                 foreach (GridDirection direction in GridDirections)
                 {
                     Vector3Int neighbor = position + direction.Offset * Difficulty.Size;
-                    if (layout.Contains(neighbor) && (required[position] & direction.Connection) == 0)
+                    if (
+                        layout.Contains(neighbor)
+                        && (required[position] & direction.Connection) == 0
+                    )
                         forbidden |= direction.Connection;
                 }
             }
             candidates.Add(position, GetRoomCandidates(type, required[position], forbidden));
         }
 
-        Dictionary<Vector3Int, RoomPlacement> placements = new Dictionary<Vector3Int, RoomPlacement>();
+        Dictionary<Vector3Int, RoomPlacement> placements =
+            new Dictionary<Vector3Int, RoomPlacement>();
         int attemptsRemaining = 20000;
         if (!SolvePlacements(layoutPositions, candidates, placements, ref attemptsRemaining))
         {
-            UnityEngine.Debug.LogWarning("Could not find compatible rotations for the connected room layout.");
+            UnityEngine.Debug.LogWarning(
+                "Could not find compatible rotations for the connected room layout."
+            );
             return false;
         }
 
@@ -597,7 +629,12 @@ public class DungeonGenerator : MonoBehaviour
                 );
             }
             RoomPlacement placement = placements[position];
-            DungeonRoom room = CreateRoom(placement.Prefab, placement.Rotation, position, existingConnections);
+            DungeonRoom room = CreateRoom(
+                placement.Prefab,
+                placement.Rotation,
+                position,
+                existingConnections
+            );
             rooms.Add(position, room);
         }
 
@@ -631,7 +668,6 @@ public class DungeonGenerator : MonoBehaviour
     {
         startRoom = null;
         endRoom = null;
-        hasWon = false;
         ClearRooms();
 
         // Generate just a list of positions
@@ -729,9 +765,7 @@ public class DungeonGenerator : MonoBehaviour
         MovePlayerToStart();
     }
 
-    void Update()
-    {
-    }
+    void Update() { }
 
     public static DungeonRoom GetRandomRoom()
     {
