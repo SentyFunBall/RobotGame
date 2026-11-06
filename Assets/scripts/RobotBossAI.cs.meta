@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b2d6d0d6056f8be47893b3cee2f2c469
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - slamVfxPrefab: {instanceID: 0}
+  - rockPrefab: {fileID: 1789802787385984536, guid: df93887da54d04340a4724b8cefbb7e4, type: 3}
+  - throwSocket: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
