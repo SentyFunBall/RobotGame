@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
+#if EDITOR
 [CustomEditor(typeof(DungeonGenerator))]
 public class DungeonGeneratorEditor : Editor
 {
@@ -30,3 +31,4 @@ public class DungeonGeneratorEditor : Editor
         }
     }
 }
+#endif
