@@ -10,9 +10,10 @@ public class DungeonGeneratorEditor : Editor
 
         DungeonGenerator generator = (DungeonGenerator)target;
         DungeonTestRenderer renderer = FindAnyObjectByType<DungeonTestRenderer>();
-        if (GUILayout.Button("Generate Dungeon"))
+
+        if (GUILayout.Button("Generate Dungeon (No loot/enemies)"))
         {
-            generator.GenerateDungeon();
+            generator.GenerateDungeonEditorMode();
             if (renderer != null)
             {
                 renderer.RenderDungeon();
