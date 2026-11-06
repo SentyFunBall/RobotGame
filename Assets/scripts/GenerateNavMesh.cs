@@ -23,8 +23,15 @@ public class GenerateNavMesh : MonoBehaviour
 
         for (int i = 0; i < numEnemies; i++)
         {
-            Vector3 roomCenter = DungeonGenerator.GetRandomRoom()?.GridPosition ?? Vector3.zero;
-            if (TryGetRandomNavMeshPosition(roomCenter, 8f, out Vector3 spawnPosition))
+            DungeonRoom room = DungeonGenerator.GetRandomNonEndRoom();
+            if (room == null)
+                break;
+
+            Vector3 roomCenter = room.GridPosition;
+            if (
+                TryGetRandomNavMeshPosition(roomCenter, 8f, out Vector3 spawnPosition)
+                && !DungeonGenerator.IsInEndRoom(spawnPosition)
+            )
             {
                 // TODO: Will need to restrict enemies to certain levels/rooms eventually
                 Instantiate(

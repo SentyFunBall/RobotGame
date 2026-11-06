@@ -1,0 +1,9 @@
+{
+    "name": "DungeonGeneratorTests",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

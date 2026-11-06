@@ -6,27 +6,51 @@ using UnityEngine.AI;
 public class RobotBossAI : MonoBehaviour
 {
     [Header("Boss Stats")]
-    [SerializeField] private float maxHealth = 300f;
+    [SerializeField]
+    private float maxHealth = 300f;
     private float currentHealth;
+    public float Health => currentHealth;
+    public float MaxHealth => maxHealth;
     private bool isDead = false;
 
     [Header("Detection & Movement")]
-    [SerializeField] private float detectionRadius = 35f;
-    [SerializeField] private float attackRange = 18f;
-    [SerializeField] private float slamTriggerDistance = 6f;
+    [SerializeField]
+    private float detectionRadius = 35f;
+
+    [SerializeField]
+    private float attackRange = 18f;
+
+    [SerializeField]
+    private float slamTriggerDistance = 6f;
 
     [Header("Ground Slam")]
-    [SerializeField] private float slamRadius = 7f;
-    [SerializeField] private float slamDamage = 40f;
-    [SerializeField] private float slamCooldown = 6f;
-    [SerializeField] private GameObject slamVfxPrefab;
+    [SerializeField]
+    private float slamRadius = 7f;
+
+    [SerializeField]
+    private float slamDamage = 40f;
+
+    [SerializeField]
+    private float slamCooldown = 6f;
+
+    [SerializeField]
+    private GameObject slamVfxPrefab;
 
     [Header("Terrain Throw")]
-    [SerializeField] private GameObject rockPrefab;
-    [SerializeField] private Transform throwSocket;
-    [SerializeField] private float throwCooldown = 8f;
-    [SerializeField] private float throwForce = 22f;
-    [SerializeField] private float upwardArc = 4f;
+    [SerializeField]
+    private GameObject rockPrefab;
+
+    [SerializeField]
+    private Transform throwSocket;
+
+    [SerializeField]
+    private float throwCooldown = 8f;
+
+    [SerializeField]
+    private float throwForce = 22f;
+
+    [SerializeField]
+    private float upwardArc = 4f;
 
     private Transform player;
     private NavMeshAgent agent;
@@ -49,7 +73,8 @@ public class RobotBossAI : MonoBehaviour
 
     private void Update()
     {
-        if (isDead || player == null || isAttacking) return;
+        if (isDead || player == null || isAttacking)
+            return;
 
         float distance = Vector3.Distance(transform.position, player.position);
 
@@ -64,7 +89,11 @@ public class RobotBossAI : MonoBehaviour
         Vector3 targetDir = (player.position - transform.position).normalized;
         targetDir.y = 0;
         if (targetDir != Vector3.zero)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                Quaternion.LookRotation(targetDir),
+                Time.deltaTime * 5f
+            );
 
         // Attack selection based on proximity and cooldowns
         if (distance <= slamTriggerDistance && Time.time >= nextSlamTime)
@@ -124,7 +153,10 @@ public class RobotBossAI : MonoBehaviour
 
         yield return new WaitForSeconds(0.6f);
 
-        Vector3 spawnPoint = throwSocket != null ? throwSocket.position : (transform.position + Vector3.up * 2f + transform.forward);
+        Vector3 spawnPoint =
+            throwSocket != null
+                ? throwSocket.position
+                : (transform.position + Vector3.up * 2f + transform.forward);
         GameObject rock = Instantiate(rockPrefab, spawnPoint, Quaternion.identity);
 
         Rigidbody rb = rock.GetComponent<Rigidbody>();
@@ -142,7 +174,8 @@ public class RobotBossAI : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        if (isDead) return;
+        if (isDead)
+            return;
 
         currentHealth -= damage;
         if (currentHealth <= 0f)
@@ -159,13 +192,30 @@ public class RobotBossAI : MonoBehaviour
         if (agent.isActiveAndEnabled && agent.isOnNavMesh)
             agent.isStopped = true;
 
-        // Triggers win screen via DungeonGenerator
+        // Win is triggered by reaching the win zone, which requires the boss to be defeated
         if (DungeonGenerator.Instance != null)
+            DungeonGenerator.Instance.BossDefeated = true;
+
+        foreach (Collider col in GetComponentsInChildren<Collider>())
+            col.enabled = false;
+
+        StartCoroutine(ShrinkAndDisable());
+    }
+
+    private IEnumerator ShrinkAndDisable()
+    {
+        yield return new WaitForSeconds(1f);
+
+        const float shrinkDuration = 0.5f;
+        Vector3 startScale = transform.localScale;
+        for (float t = 0f; t < shrinkDuration; t += Time.deltaTime)
         {
-            DungeonGenerator.Instance.TriggerWin();
+            transform.localScale = Vector3.Lerp(startScale, Vector3.zero, t / shrinkDuration);
+            yield return null;
         }
 
-        Destroy(gameObject, 0.5f);
+        transform.localScale = Vector3.zero;
+        gameObject.SetActive(false);
     }
 
     private void OnDrawGizmosSelected()

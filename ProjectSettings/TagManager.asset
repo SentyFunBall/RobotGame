@@ -6,6 +6,7 @@ TagManager:
   tags:
   - NoOcclude
   - Loot
+  - Boss
   layers:
   - Default
   - TransparentFX

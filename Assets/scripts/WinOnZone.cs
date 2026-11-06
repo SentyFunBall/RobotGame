@@ -14,6 +14,9 @@ public class WinOnZone : MonoBehaviour
     {
         if (other.gameObject == player)
         {
+            if (DungeonGenerator.Instance != null && !DungeonGenerator.Instance.BossDefeated)
+                return;
+
             GameMenusController menus = FindAnyObjectByType<GameMenusController>();
             if (menus != null)
                 menus.ShowWinMenu();

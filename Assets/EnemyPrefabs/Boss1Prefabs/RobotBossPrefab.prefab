@@ -93,7 +93,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: af76af824b28b3e4c886f28fe92035ec, type: 3}
       propertyPath: m_Name
-      value: RobotBoss
+      value: RobotBossPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: af76af824b28b3e4c886f28fe92035ec, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: af76af824b28b3e4c886f28fe92035ec, type: 3}
+      propertyPath: m_TagString
+      value: Boss
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -172,14 +180,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2d6d0d6056f8be47893b3cee2f2c469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotBossAI
-  maxHealth: 300
-  detectionRadius: 35
-  attackRange: 18
-  slamTriggerDistance: 6
-  slamRadius: 7
-  slamDamage: 40
+  maxHealth: 100
+  detectionRadius: 15
+  attackRange: 4
+  slamTriggerDistance: 4
+  slamRadius: 4
+  slamDamage: 15
   slamCooldown: 6
-  slamVfxPrefab: {fileID: 0}
+  slamVfxPrefab: {fileID: 1789802787385984536, guid: df93887da54d04340a4724b8cefbb7e4, type: 3}
   rockPrefab: {fileID: 1789802787385984536, guid: df93887da54d04340a4724b8cefbb7e4, type: 3}
   throwSocket: {fileID: 4044310312668312376}
   throwCooldown: 8

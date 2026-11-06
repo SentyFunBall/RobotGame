@@ -665,13 +665,14 @@ public class DungeonGenerator : MonoBehaviour
     {
         foreach (DungeonRoom room in rooms.Values)
         {
-            if (room == null)
+            if (room == null || room == endRoom)
                 continue;
 
             // Only check North and East to avoid creating duplicate links for each pair of connected rooms.
-            if (room.North != null)
+            // The end room is left unlinked so it stays unreachable by navmesh agents.
+            if (room.North != null && room.North != endRoom)
                 room.LinkNorth = CreateNavMeshLink(room, room.North, Vector3.forward);
-            if (room.East != null)
+            if (room.East != null && room.East != endRoom)
                 room.LinkEast = CreateNavMeshLink(room, room.East, Vector3.right);
         }
     }
@@ -816,7 +817,24 @@ public class DungeonGenerator : MonoBehaviour
         MovePlayerToStart();
     }
 
-    void Update() { }
+    void Update()
+    {
+        // Show boss UI when player enters the boss room
+        if (
+            endRoom != null
+            && Vector3.Distance(
+                player.transform.position,
+                new Vector3(endRoom.GridPosition.x, 1f, endRoom.GridPosition.z)
+            ) < 15f
+        )
+        {
+            GameMenusController menus = FindAnyObjectByType<GameMenusController>();
+            if (menus != null)
+            {
+                menus.ShowBossUI();
+            }
+        }
+    }
 
     public static DungeonRoom GetRandomRoom()
     {
@@ -827,8 +845,32 @@ public class DungeonGenerator : MonoBehaviour
         return roomList[Random.Range(0, roomList.Count)];
     }
 
+    public static DungeonRoom GetRandomNonEndRoom()
+    {
+        List<DungeonRoom> roomList = new List<DungeonRoom>();
+        foreach (DungeonRoom room in rooms.Values)
+        {
+            if (room != null && room != endRoom)
+                roomList.Add(room);
+        }
+        return roomList.Count == 0 ? null : roomList[Random.Range(0, roomList.Count)];
+    }
+
+    // Spawn search radii can reach into neighboring rooms, so check the footprint by position.
+    public static bool IsInEndRoom(Vector3 position)
+    {
+        if (endRoom == null || Instance == null)
+            return false;
+        float half = Instance.Difficulty.Size * 0.5f;
+        return Mathf.Abs(position.x - endRoom.GridPosition.x) <= half
+            && Mathf.Abs(position.z - endRoom.GridPosition.z) <= half;
+    }
+
+    public bool BossDefeated { get; set; }
+
     public void SpawnBoss()
     {
+        BossDefeated = robotBossPrefab == null || endRoom == null;
         if (robotBossPrefab != null && endRoom != null)
         {
             Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 1f, endRoom.GridPosition.z);
