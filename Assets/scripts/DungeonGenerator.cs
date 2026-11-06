@@ -43,6 +43,10 @@ public class DungeonGenerator : MonoBehaviour
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
     private static GameObject player;
+    private bool hasWon;
+
+    [SerializeField]
+    private GameObject robotBossPrefab;
     private static List<Vector3Int> occupiedPositions = new();
 
     [SerializeField]
@@ -783,11 +787,11 @@ public class DungeonGenerator : MonoBehaviour
             UnityEngine.Debug.LogError($"Dungeon generation failed after {maxAttempts} attempts.");
             return;
         }
-
         if (spawnEnemiesAndLoot)
         {
             StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
             StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
+            SpawnBoss();
             StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
         }
 
@@ -821,5 +825,27 @@ public class DungeonGenerator : MonoBehaviour
 
         List<DungeonRoom> roomList = new List<DungeonRoom>(rooms.Values);
         return roomList[Random.Range(0, roomList.Count)];
+    }
+
+    public void SpawnBoss()
+    {
+        if (robotBossPrefab != null && endRoom != null)
+        {
+            Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 1f, endRoom.GridPosition.z);
+            Instantiate(robotBossPrefab, spawnPos, Quaternion.identity);
+        }
+    }
+
+    public void TriggerWin()
+    {
+        if (hasWon)
+            return;
+
+        hasWon = true;
+        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
+        if (menus != null)
+        {
+            menus.ShowWinMenu();
+        }
     }
 }
