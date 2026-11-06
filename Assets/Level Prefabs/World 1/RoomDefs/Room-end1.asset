@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 139c5befa57ee7745b3f5c81affc6b14, type: 3}
   m_Name: Room-end1
   m_EditorClassIdentifier: Assembly-CSharp::RoomDefinition
-  Connections: 2
-  Type: 2
+  Connections: 1
+  Type: 4
   Features: 16
+  CanRotate: 0

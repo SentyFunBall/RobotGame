@@ -6,7 +6,7 @@ public class LevelSelectController : MonoBehaviour
 {
     private Button level1Button;
     private Button level2Button;
-    public  GameObject levelScreen;
+    public GameObject levelScreen;
     private PanelRenderer panelRenderer;
 
     void OnEnable()
@@ -18,13 +18,15 @@ public class LevelSelectController : MonoBehaviour
 
         panelRenderer = levelScreen.GetComponent<PanelRenderer>();
 
-        if(panelRenderer != null)
+        if (panelRenderer != null)
         {
             panelRenderer.RegisterUIReloadCallback(OnUIReload);
         }
         else
         {
-            Debug.LogWarning("[LevelSelectController] No PanelRenderer found on levelScreen GameObject.");
+            Debug.LogWarning(
+                "[LevelSelectController] No PanelRenderer found on levelScreen GameObject."
+            );
         }
     }
 
@@ -59,7 +61,9 @@ public class LevelSelectController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[LevelSelectController] 'Level1Button' not found in VisualElement hierarchy.");
+            Debug.LogWarning(
+                "[LevelSelectController] 'Level1Button' not found in VisualElement hierarchy."
+            );
         }
 
         if (level2Button != null)
@@ -69,7 +73,9 @@ public class LevelSelectController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[LevelSelectController] 'Level2Button' not found in VisualElement hierarchy.");
+            Debug.LogWarning(
+                "[LevelSelectController] 'Level2Button' not found in VisualElement hierarchy."
+            );
         }
     }
 
@@ -81,10 +87,10 @@ public class LevelSelectController : MonoBehaviour
     public void LoadLevel2()
     {
         //this exits the program because we don't have level 2 implemented yet
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
+        /*#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
         #else
-        Application.Quit();
-        #endif
+                Application.Quit();
+        #endif*/
     }
 }

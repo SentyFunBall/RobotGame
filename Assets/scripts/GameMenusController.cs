@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -6,6 +7,7 @@ public class GameMenusController : MonoBehaviour
 {
     [SerializeField]
     private GameObject player;
+    private RobotBossAI bossAI;
 
     [SerializeField]
     private GameObject pauseMenu;
@@ -17,6 +19,11 @@ public class GameMenusController : MonoBehaviour
     [SerializeField]
     private GameObject winMenu;
 
+    [SerializeField]
+    private GameObject bossUI;
+
+    private GameObject boss;
+
     private InputSystem_Actions controls;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -25,6 +32,10 @@ public class GameMenusController : MonoBehaviour
         pauseMenu.SetActive(false);
         deathMenu.SetActive(false);
         winMenu.SetActive(false);
+        bossUI.SetActive(false);
+        boss = GameObject.FindWithTag("Boss");
+        if (boss != null)
+            bossAI = boss.GetComponent<RobotBossAI>();
     }
 
     void Awake()
@@ -53,6 +64,15 @@ public class GameMenusController : MonoBehaviour
                 Pause();
             else
                 Resume();
+        }
+
+        // Update boss UI healthbar
+        if (boss != null && bossUI.activeSelf)
+        {
+            float bossHealth = bossAI.Health;
+            float bossMaxHealth = bossAI.MaxHealth;
+            bossUI.transform.Find("HealthBar").GetComponent<UnityEngine.UI.Slider>().value =
+                bossHealth / bossMaxHealth;
         }
     }
 
@@ -94,5 +114,13 @@ public class GameMenusController : MonoBehaviour
     {
         winMenu.SetActive(true);
         Time.timeScale = 0f;
+        GameObject lootText = winMenu.transform.Find("loottx").gameObject;
+        lootText.GetComponent<TextMeshProUGUI>().text = "Loot Collected: " + PickupLoot.lootCount;
+        bossUI.SetActive(false);
+    }
+
+    public void ShowBossUI()
+    {
+        bossUI.SetActive(true);
     }
 }

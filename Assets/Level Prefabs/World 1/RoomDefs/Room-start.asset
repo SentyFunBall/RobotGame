@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Room-Start
   m_EditorClassIdentifier: Assembly-CSharp::RoomDefinition
   Connections: 2
-  Type: 2
+  Type: 1
   Features: 0
   CanRotate: 1

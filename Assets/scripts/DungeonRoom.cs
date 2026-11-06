@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 public class DungeonRoom : MonoBehaviour
@@ -11,6 +12,11 @@ public class DungeonRoom : MonoBehaviour
     public DungeonRoom South;
     public DungeonRoom East;
     public DungeonRoom West;
+
+    public NavMeshLink LinkNorth;
+    public NavMeshLink LinkSouth;
+    public NavMeshLink LinkEast;
+    public NavMeshLink LinkWest;
 
     public GameObject DoorN;
     public GameObject DoorS;

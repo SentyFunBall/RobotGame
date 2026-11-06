@@ -80,6 +80,9 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GetComponent<PlayerHealth>().Health <= 0)
+            return;
+
         moveInput = controls.Player.Move.ReadValue<Vector2>();
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
         isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
@@ -89,18 +92,18 @@ public class PlayerController : MonoBehaviour
         if (controls.Player.Attack.triggered)
             doAttack = true;
 
-        bool t = controls.Player.DEBUGAddPowerUp.triggered;
+        /*bool t = controls.Player.DEBUGAddPowerUp.triggered;
         if (t)
         {
             powerUpManager.ActivatePowerUp(PowerUpType.Speed);
-        }
+        }*/
     }
 
     void FixedUpdate()
     {
         // Since camera is tilted, W actually is forward + left, etc
         Vector3 desiredVelocity =
-            new Vector3(moveInput.x, 0.0f, moveInput.y).normalized
+            new Vector3(-moveInput.x, 0.0f, -moveInput.y).normalized
             * moveSpeed
             * (
                 isSlow ? slowMod
@@ -199,6 +202,14 @@ public class PlayerController : MonoBehaviour
                 if (enemy != null)
                 {
                     enemy.TakeDamage(attackDamage);
+                }
+                else
+                {
+                    RobotBossAI boss = hitInfo.collider.GetComponentInParent<RobotBossAI>();
+                    if (boss != null)
+                    {
+                        boss.TakeDamage(attackDamage);
+                    }
                 }
             }
             characterAnimation.Attack();
