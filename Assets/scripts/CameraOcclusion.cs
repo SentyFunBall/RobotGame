@@ -113,6 +113,8 @@ public class CameraOcclusion : MonoBehaviour
 
     void SetAlpha(Renderer renderer, float alpha)
     {
+        if (renderer == null)
+            return;
         props ??= new MaterialPropertyBlock();
 
         renderer.GetPropertyBlock(props);

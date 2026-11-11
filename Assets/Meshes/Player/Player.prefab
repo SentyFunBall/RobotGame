@@ -113,7 +113,7 @@ MonoBehaviour:
   enemyMask:
     serializedVersion: 2
     m_Bits: 256
-  attackCooldown: 3
+  attackCooldown: 1
 --- !u!114 &812377548209013917
 MonoBehaviour:
   m_ObjectHideFlags: 0

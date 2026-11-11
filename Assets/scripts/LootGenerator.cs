@@ -5,7 +5,7 @@ using static SpawnUtility;
 
 public class LootGenerator : MonoBehaviour
 {
-    private static Dictionary<Vector3Int, DungeonRoom> dungeonRooms = new();
+    private Dictionary<Vector3Int, DungeonRoom> dungeonRooms = new();
     public float lootSpawnChance;
     public int maxLootInDungeon;
     public int minLootInDungeon;
@@ -17,10 +17,25 @@ public class LootGenerator : MonoBehaviour
     [SerializeField]
     private GameObject lootPrefab;
 
+    public void Reset()
+    {
+        totalLootCount = 0;
+        dungeonRooms = new();
+        foreach (var roomLoot in loot.Values)
+        {
+            foreach (var lootObject in roomLoot)
+            {
+                if (lootObject != null)
+                    Destroy(lootObject);
+            }
+        }
+        loot.Clear();
+    }
+
     public IEnumerator GenerateLoot()
     {
         yield return null;
-        dungeonRooms = DungeonGenerator.rooms;
+        dungeonRooms = new(DungeonGenerator.rooms);
 
         // bing bang boom generate loot for each dungeon room
         foreach (var room in dungeonRooms.Values)

@@ -42,6 +42,10 @@ public class DungeonGenerator : MonoBehaviour
 
     private static DungeonRoom startRoom;
     private static DungeonRoom endRoom;
+
+    public static DungeonRoom StartRoom => startRoom;
+    public static DungeonRoom EndRoom => endRoom;
+
     private static GameObject player;
     private bool hasWon;
 
@@ -53,7 +57,7 @@ public class DungeonGenerator : MonoBehaviour
     private GameObject navMesh;
 
     [SerializeField]
-    private float navMeshLinkWidth = 3f;
+    private float navMeshLinkWidth = 6f;
 
     // Distance each link endpoint sits from the shared doorway, so both land on room navmeshes.
     [SerializeField]
@@ -61,6 +65,22 @@ public class DungeonGenerator : MonoBehaviour
 
     [SerializeField]
     private List<GameObject> allRooms = new();
+
+    public void Reset()
+    {
+        GetComponent<LootGenerator>().Reset();
+        GenerateNavMesh.Reset();
+
+        ClearRooms();
+        rooms.Clear();
+        openConnections.Clear();
+        occupiedPositions.Clear();
+        startRoom = null;
+        endRoom = null;
+        player = null;
+        //GetComponent<LootGenerator>().totalLootCount = 0;
+        //PickupLoot.lootCount = 0;
+    }
 
     private void Awake()
     {
@@ -71,15 +91,7 @@ public class DungeonGenerator : MonoBehaviour
         }
         Instance = this;
 
-        // Statics survive scene reloads and would hold destroyed rooms from the previous load
-        rooms.Clear();
-        openConnections.Clear();
-        occupiedPositions.Clear();
-        startRoom = null;
-        endRoom = null;
-        player = null;
-        LootGenerator.totalLootCount = 0;
-        PickupLoot.lootCount = 0;
+        Reset();
 
         ApplyDifficulty(MenuControler.SelectedDifficulty);
     }
@@ -99,6 +111,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.TrapFrequency = 5;
                 Difficulty.Size = 12;
                 Difficulty.RoomCount = 15;
+                Difficulty.numberOfEnemies = 5;
                 break;
 
             case "Hard":
@@ -106,7 +119,8 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.PuzzleComplexity = 45;
                 Difficulty.TrapFrequency = 45;
                 Difficulty.Size = 12;
-                Difficulty.RoomCount = 35;
+                Difficulty.RoomCount = 50;
+                Difficulty.numberOfEnemies = 20;
                 break;
 
             case "Medium":
@@ -115,7 +129,8 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.PuzzleComplexity = 25;
                 Difficulty.TrapFrequency = 25;
                 Difficulty.Size = 12;
-                Difficulty.RoomCount = 25;
+                Difficulty.RoomCount = 30;
+                Difficulty.numberOfEnemies = 12;
                 break;
         }
     }
@@ -574,7 +589,7 @@ public class DungeonGenerator : MonoBehaviour
         return false;
     }
 
-    private bool PopulateRooms(List<Vector3Int> layoutPositions)
+    private bool PopulateRooms(List<Vector3Int> layoutPositions, bool useBossEnd)
     {
         if (
             !PlanConnections(
@@ -598,7 +613,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             RoomType type =
                 position == startPosition ? RoomType.Start
-                : position == endPosition ? RoomType.End
+                : position == endPosition ? (useBossEnd ? RoomType.Boss : RoomType.End)
                 : RoomType.None;
             RoomConnections forbidden = RoomConnections.None;
             if (type != RoomType.None)
@@ -697,7 +712,7 @@ public class DungeonGenerator : MonoBehaviour
         return link;
     }
 
-    private void MovePlayerToStart()
+    public void MovePlayerToStart()
     {
         if (player == null)
             player = GameObject.FindWithTag("Player");
@@ -716,7 +731,7 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    private bool TryGenerateRooms()
+    private bool TryGenerateRooms(bool useBossEnd)
     {
         startRoom = null;
         endRoom = null;
@@ -730,7 +745,7 @@ public class DungeonGenerator : MonoBehaviour
             return false;
         }
 
-        if (!PopulateRooms(layoutPositions))
+        if (!PopulateRooms(layoutPositions, useBossEnd))
         {
             UnityEngine.Debug.LogWarning("Could not populate the dungeon with compatible rooms.");
             return false;
@@ -757,17 +772,17 @@ public class DungeonGenerator : MonoBehaviour
         endRoom = null;
     }
 
-    public void GenerateDungeon()
+    public void GenerateDungeon(bool useBossEnd)
     {
-        GenerateDungeonInternal(spawnEnemiesAndLoot: true);
+        GenerateDungeonInternal(spawnEnemiesAndLoot: true, useBossEnd: useBossEnd);
     }
 
     public void GenerateDungeonEditorMode()
     {
-        GenerateDungeonInternal(spawnEnemiesAndLoot: false);
+        GenerateDungeonInternal(spawnEnemiesAndLoot: false, useBossEnd: false);
     }
 
-    private void GenerateDungeonInternal(bool spawnEnemiesAndLoot)
+    private void GenerateDungeonInternal(bool spawnEnemiesAndLoot, bool useBossEnd)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -778,7 +793,7 @@ public class DungeonGenerator : MonoBehaviour
         bool generated = false;
         for (int attempt = 0; attempt < maxAttempts && !generated; attempt++)
         {
-            generated = TryGenerateRooms();
+            generated = TryGenerateRooms(useBossEnd);
             if (!generated)
                 ClearRooms();
         }
@@ -792,7 +807,8 @@ public class DungeonGenerator : MonoBehaviour
         {
             StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().Bake());
             StartCoroutine(navMesh.GetComponent<GenerateNavMesh>().SpawnEnemies());
-            SpawnBoss();
+            if (useBossEnd)
+                SpawnBoss();
             StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
         }
 
@@ -801,39 +817,15 @@ public class DungeonGenerator : MonoBehaviour
         UnityEngine.Debug.Log("Dungeon generation time: " + stopwatch.ElapsedMilliseconds + " ms");
     }
 
-    public void ResetDungeon()
-    {
-        ClearRooms();
-    }
-
     void OnEnable()
     {
-        if (rooms.Count == 0)
-            GenerateDungeon();
+        /*if (rooms.Count == 0)
+            GenerateDungeon();*/
     }
 
     void Start()
     {
         MovePlayerToStart();
-    }
-
-    void Update()
-    {
-        // Show boss UI when player enters the boss room
-        if (
-            endRoom != null
-            && Vector3.Distance(
-                player.transform.position,
-                new Vector3(endRoom.GridPosition.x, 1f, endRoom.GridPosition.z)
-            ) < 15f
-        )
-        {
-            GameMenusController menus = FindAnyObjectByType<GameMenusController>();
-            if (menus != null)
-            {
-                menus.ShowBossUI();
-            }
-        }
     }
 
     public static DungeonRoom GetRandomRoom()
@@ -875,19 +867,6 @@ public class DungeonGenerator : MonoBehaviour
         {
             Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 1f, endRoom.GridPosition.z);
             Instantiate(robotBossPrefab, spawnPos, Quaternion.identity);
-        }
-    }
-
-    public void TriggerWin()
-    {
-        if (hasWon)
-            return;
-
-        hasWon = true;
-        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
-        if (menus != null)
-        {
-            menus.ShowWinMenu();
         }
     }
 }
