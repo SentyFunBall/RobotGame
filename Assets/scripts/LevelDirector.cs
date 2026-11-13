@@ -68,7 +68,10 @@ public class LevelDirector : MonoBehaviour
             GameMenusController menus = FindAnyObjectByType<GameMenusController>();
             if (menus != null)
             {
-                menus.ShowBossUI();
+                if (!menus.IsBossUIActive())
+                {
+                    menus.ShowBossUI();
+                }
             }
         }
     }

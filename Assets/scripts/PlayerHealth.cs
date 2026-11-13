@@ -30,6 +30,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField]
     private Slider healthBar;
 
+    [SerializeField]
+    private Slider cooldownBar;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -51,6 +54,12 @@ public class PlayerHealth : MonoBehaviour
         if (healthTextObject != null)
         {
             healthTextObject.GetComponent<TextMeshProUGUI>().text = prefix + health.ToString("F0");
+        }
+        var cooldown = GetComponent<PlayerController>().attackCooldown;
+        var nextAttackTime = GetComponent<PlayerController>().nextAttackTime;
+        if (cooldownBar != null)
+        {
+            cooldownBar.value = 1 - ((nextAttackTime - Time.time) / cooldown);
         }
     }
 

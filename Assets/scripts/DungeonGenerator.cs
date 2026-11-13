@@ -35,6 +35,7 @@ public struct OpenConnection
 public class DungeonGenerator : MonoBehaviour
 {
     public static DungeonGenerator Instance { get; private set; }
+    public static int LayoutVersion { get; private set; }
 
     public DungeonDifficulty Difficulty = new();
     public static Dictionary<Vector3Int, DungeonRoom> rooms = new();
@@ -670,6 +671,7 @@ public class DungeonGenerator : MonoBehaviour
         startRoom.gameObject.name += " (Start)";
         endRoom.gameObject.name += " (End)";
         ConnectNavMeshLinks();
+        LayoutVersion++;
         return true;
     }
 
@@ -756,6 +758,7 @@ public class DungeonGenerator : MonoBehaviour
 
     private void ClearRooms()
     {
+        LayoutVersion++;
         foreach (DungeonRoom room in rooms.Values)
         {
             if (room == null)

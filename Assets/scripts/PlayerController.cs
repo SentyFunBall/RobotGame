@@ -45,8 +45,9 @@ public class PlayerController : MonoBehaviour
     private LayerMask enemyMask;
 
     [SerializeField]
-    private float attackCooldown = 2.0f;
-    private float nextAttackTime;
+    public float attackCooldown = 2.0f;
+
+    public float nextAttackTime;
 
     void Awake()
     {

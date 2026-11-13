@@ -296,6 +296,7 @@ public class EnemyAI : MonoBehaviour
     }
 
     private bool dying;
+    public bool IsAlive => !dying;
 
     public void TakeDamage(float damage)
     {
