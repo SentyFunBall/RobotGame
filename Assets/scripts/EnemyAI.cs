@@ -301,6 +301,8 @@ public class EnemyAI : MonoBehaviour
     public void TakeDamage(float damage)
     {
         health -= damage;
+        if (GetComponent<AudioSource>() != null)
+            GetComponent<AudioSource>().Play();
         if (health <= 0f && !dying)
         {
             dying = true;

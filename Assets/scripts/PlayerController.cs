@@ -30,8 +30,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float groundCheckDistance = 0.05f;
 
+    [Header("Audio")]
+    [SerializeField]
+    private AudioSource attackAudio;
+
+    [SerializeField]
+    private AudioSource rollingAudio;
+
     private PowerUpManager powerUpManager;
     private CharacterAnimation characterAnimation;
+    private bool grounded;
 
     private bool doAttack;
 
@@ -64,6 +72,9 @@ public class PlayerController : MonoBehaviour
     void OnDisable()
     {
         controls.Disable();
+        if (rollingAudio != null)
+            rollingAudio.Stop();
+        grounded = false;
     }
 
     void Start()
@@ -76,6 +87,10 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError("CharacterAnimation not found on player.");
         }
+        if (attackAudio == null || attackAudio.clip == null)
+            Debug.LogError("Player attack audio source or clip is not assigned.", this);
+        if (rollingAudio == null || rollingAudio.clip == null)
+            Debug.LogError("Player rolling audio source or clip is not assigned.", this);
     }
 
     // Update is called once per frame
@@ -84,7 +99,22 @@ public class PlayerController : MonoBehaviour
         if (GetComponent<PlayerHealth>().Health <= 0)
         {
             moveInput = Vector2.zero;
+            if (rollingAudio != null && rollingAudio.isPlaying)
+                rollingAudio.Stop();
             return;
+        }
+
+        if (rollingAudio != null)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            bool shouldRoll =
+                Time.timeScale > 0f
+                && grounded
+                && new Vector2(velocity.x, velocity.z).sqrMagnitude > 0.01f;
+            if (shouldRoll && !rollingAudio.isPlaying)
+                rollingAudio.Play();
+            else if (!shouldRoll && rollingAudio.isPlaying)
+                rollingAudio.Stop();
         }
 
         moveInput = controls.Player.Move.ReadValue<Vector2>();
@@ -122,7 +152,7 @@ public class PlayerController : MonoBehaviour
         Vector3 velocityChange = desiredVelocity - velocity;
 
         Bounds colliderBounds = playerCollider.bounds;
-        bool grounded = Physics.Raycast(
+        grounded = Physics.Raycast(
             colliderBounds.center,
             Vector3.down,
             out RaycastHit hit,
@@ -187,6 +217,7 @@ public class PlayerController : MonoBehaviour
             if (Time.time < nextAttackTime)
                 return;
             nextAttackTime = Time.time + attackCooldown;
+
             Transform playerChild = transform.GetChild(0);
             Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
             // Cast from body height; the child pivot is at the feet, below enemy colliders
@@ -225,6 +256,8 @@ public class PlayerController : MonoBehaviour
                 )
             )
             {
+                if (attackAudio != null)
+                    attackAudio.Play();
                 TryDamageTarget(hitInfo.collider);
             }
             characterAnimation.Attack();

@@ -33,6 +33,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField]
     private Slider cooldownBar;
 
+    [SerializeField]
+    private AudioSource hitAudio;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -67,9 +70,7 @@ public class PlayerHealth : MonoBehaviour
     {
         health -= damage;
         if (health < 0)
-        {
             health = 0;
-        }
         if (health == 0)
         {
             if (characterAnimation != null)
@@ -81,14 +82,12 @@ public class PlayerHealth : MonoBehaviour
                 gameMenusController.ShowDeathMenu();
             }
         }
+        if (hitAudio != null)
+            hitAudio.Play();
         if (characterAnimation != null)
-        {
             characterAnimation.Hit();
-        }
         if (healthBar != null)
-        {
             healthBar.value = health / maxHealth;
-        }
     }
 
     public void Heal(float amount)
