@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-#if EDITOR
+#if UNITY_EDITOR
 [CustomEditor(typeof(DungeonGenerator))]
 public class DungeonGeneratorEditor : Editor
 {
@@ -23,7 +23,7 @@ public class DungeonGeneratorEditor : Editor
 
         if (GUILayout.Button("Reset Dungeon"))
         {
-            generator.ResetDungeon();
+            generator.Reset();
             if (renderer != null)
             {
                 renderer.RenderDungeon();

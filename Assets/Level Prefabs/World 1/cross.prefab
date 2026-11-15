@@ -75,15 +75,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -22.88131
+      value: 9.37609
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.82409
+      value: -1.56256
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.75611
+      value: -2.39628
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
       propertyPath: m_LocalRotation.w
@@ -125,6 +125,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: cross
       objectReference: {fileID: 0}
+    - target: {fileID: 2249575649871743523, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
+    - target: {fileID: 2697274208075647574, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
+    - target: {fileID: 4050931790513969905, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4045704598060273017, guid: 7dcccb1cc9c88a54eab7b7aad2c529cd, type: 3}
@@ -202,7 +214,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 0.625, z: 3}
+  m_Size: {x: 3.3, y: 0.625, z: 3.3}
   m_Center: {x: 0, y: -0.1875, z: 0}
 --- !u!1 &3437898309093993725 stripped
 GameObject:
@@ -252,6 +264,10 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
+  LinkNorth: {fileID: 0}
+  LinkSouth: {fileID: 0}
+  LinkEast: {fileID: 0}
+  LinkWest: {fileID: 0}
   DoorN: {fileID: 4966598773887557857}
   DoorS: {fileID: 3437898309093993725}
   DoorE: {fileID: 4573792051762200679}
@@ -288,7 +304,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.13333334
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: cca42f8b46454904d803f59d95919f88, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: c6a1f1f2f01334c4a82d002f54c01376, type: 2}
   m_BuildHeightMesh: 0
 --- !u!4 &4108717035660523938 stripped
 Transform:

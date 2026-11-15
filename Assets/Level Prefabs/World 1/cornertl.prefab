@@ -75,15 +75,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -22.88131
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.82409
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.75611
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -117,10 +117,18 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -6822452893370057715, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
     - target: {fileID: -6736589324831370659, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4139576257964613091, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
     - target: {fileID: -3360691251032584096, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -133,6 +141,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3862467599183508618, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
+    - target: {fileID: 3868292229226770400, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 6574091114309173524, guid: c706165e2bc609b46b7e31444dd285c7, type: 3}
@@ -245,6 +261,10 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
+  LinkNorth: {fileID: 0}
+  LinkSouth: {fileID: 0}
+  LinkEast: {fileID: 0}
+  LinkWest: {fileID: 0}
   DoorN: {fileID: 0}
   DoorS: {fileID: 2330769693455540934}
   DoorE: {fileID: 7211640130173361101}
@@ -281,7 +301,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.13333334
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: b765086fbe5e64e43b0d693cd62f2336, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 9eb1369968cb1f64da1e0f820df1ac8b, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &2330769693455540934 stripped
 GameObject:
@@ -359,8 +379,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 0.5032635, z: 3}
-  m_Center: {x: 0, y: -0.12336826, z: 0}
+  m_Size: {x: 3.1391902, y: 0.5032635, z: 3.1263657}
+  m_Center: {x: 0.0695951, y: -0.12336826, z: -0.06318283}
 --- !u!65 &7653952808372432342
 BoxCollider:
   m_ObjectHideFlags: 0

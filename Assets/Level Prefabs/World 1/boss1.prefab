@@ -57,6 +57,10 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
+  LinkNorth: {fileID: 0}
+  LinkSouth: {fileID: 0}
+  LinkEast: {fileID: 0}
+  LinkWest: {fileID: 0}
   DoorN: {fileID: 6908381280002150851}
   DoorS: {fileID: 0}
   DoorE: {fileID: 0}
@@ -1194,8 +1198,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.75, y: 0.625, z: 4.5}
-  m_Center: {x: -0.375, y: -0.1875, z: 0.25}
+  m_Size: {x: 3.75, y: 0.625, z: 4.6290007}
+  m_Center: {x: -0.375, y: -0.1875, z: 0.31450033}
 --- !u!114 &6360242712711673224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1209,8 +1213,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
   m_SerializedVersion: 0
-  m_Size: {x: 4, y: 3, z: 2.6782255}
-  m_Center: {x: 0, y: 1, z: -2.742463}
+  m_Size: {x: 3.736915, y: 3, z: 2.6782255}
+  m_Center: {x: -0.3411858, y: 1, z: -2.742463}
   m_Area: 1
   m_AffectedAgents: ffffffff
 --- !u!1 &4603904318601774858

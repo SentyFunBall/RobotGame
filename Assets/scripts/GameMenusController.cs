@@ -24,7 +24,11 @@ public class GameMenusController : MonoBehaviour
 
     private GameObject boss;
 
+    [SerializeField]
+    private GameObject shopMenu;
+
     private InputSystem_Actions controls;
+    private bool shownBossUI = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -33,6 +37,13 @@ public class GameMenusController : MonoBehaviour
         deathMenu.SetActive(false);
         winMenu.SetActive(false);
         bossUI.SetActive(false);
+        shopMenu.SetActive(false);
+    }
+
+    void FindBoss()
+    {
+        if (boss != null)
+            return;
         boss = GameObject.FindWithTag("Boss");
         if (boss != null)
             bossAI = boss.GetComponent<RobotBossAI>();
@@ -67,12 +78,17 @@ public class GameMenusController : MonoBehaviour
         }
 
         // Update boss UI healthbar
-        if (boss != null && bossUI.activeSelf)
+        if (boss != null)
         {
             float bossHealth = bossAI.Health;
             float bossMaxHealth = bossAI.MaxHealth;
             bossUI.transform.Find("HealthBar").GetComponent<UnityEngine.UI.Slider>().value =
                 bossHealth / bossMaxHealth;
+
+            if (bossHealth <= 0f)
+            {
+                bossUI.SetActive(false);
+            }
         }
     }
 
@@ -85,6 +101,7 @@ public class GameMenusController : MonoBehaviour
     public void Resume()
     {
         pauseMenu.SetActive(false);
+        shopMenu.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
     }
@@ -121,6 +138,19 @@ public class GameMenusController : MonoBehaviour
 
     public void ShowBossUI()
     {
+        FindBoss();
         bossUI.SetActive(true);
+        shownBossUI = true;
+    }
+
+    public void ShowShopMenu()
+    {
+        Time.timeScale = 0f;
+        shopMenu.SetActive(true);
+    }
+
+    public bool IsBossUIActive()
+    {
+        return shownBossUI;
     }
 }

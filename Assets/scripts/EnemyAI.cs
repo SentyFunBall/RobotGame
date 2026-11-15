@@ -36,6 +36,14 @@ public class EnemyAI : MonoBehaviour
     private LayerMask detectionLayer;
     public DetectionState currentDetectionState = DetectionState.Normal;
 
+    [SerializeField]
+    private float damageFlashDuration = 0.1f;
+    private Renderer[] renderers;
+    private MaterialPropertyBlock propBlock;
+    private Coroutine damageFlashCoroutine;
+
+    private static readonly int baseColor = Shader.PropertyToID("_BaseColor");
+
     [Header("Combat")]
     [SerializeField]
     private float attackRange;
@@ -61,17 +69,22 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float lungeDuration = 0.25f;
 
+    [SerializeField]
+    private float meleeWinddownDelay = 0.653f;
+
     private enum MeleeState
     {
         None,
         Windup,
         Lunge,
+        Winddown,
     }
 
     private MeleeState meleeState = MeleeState.None;
     private float meleeStateEndTime;
     private Vector3 lockedDirection;
     private bool lungeHit;
+    private bool previousUpdateRotation;
 
     private NavMeshAgent agent;
     private Transform player;
@@ -88,6 +101,9 @@ public class EnemyAI : MonoBehaviour
         characterAnimation = GetComponent<CharacterAnimation>();
         characterAnimation.FindAndSetAnimator();
         health = maxHealth;
+
+        renderers = GetComponentsInChildren<Renderer>();
+        propBlock = new MaterialPropertyBlock();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -181,12 +197,19 @@ public class EnemyAI : MonoBehaviour
         characterAnimation.Attack();
         agent.isStopped = true;
         agent.ResetPath();
+        agent.velocity = Vector3.zero;
+        previousUpdateRotation = agent.updateRotation;
+        agent.updateRotation = false;
         meleeState = MeleeState.Windup;
         meleeStateEndTime = Time.time + meleeWindupDelay;
     }
 
     private void UpdateMeleeAttack(float distance)
     {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        transform.rotation = Quaternion.LookRotation(lockedDirection, Vector3.up);
+
         if (meleeState == MeleeState.Windup)
         {
             if (Time.time >= meleeStateEndTime)
@@ -198,18 +221,30 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // Lunge: direction stays locked, no steering toward the player
-        agent.Move(lockedDirection * lungeSpeed * Time.deltaTime);
-
-        if (!lungeHit && IsTouchingPlayer())
+        if (meleeState == MeleeState.Lunge)
         {
-            lungeHit = true;
-            DamagePlayer();
+            // Lunge: direction stays locked, no steering toward the player
+            agent.Move(lockedDirection * lungeSpeed * Time.deltaTime);
+
+            if (!lungeHit && IsTouchingPlayer())
+            {
+                lungeHit = true;
+                DamagePlayer();
+            }
+
+            if (Time.time >= meleeStateEndTime)
+            {
+                meleeState = MeleeState.Winddown;
+                meleeStateEndTime = Time.time + meleeWinddownDelay;
+            }
+            return;
         }
 
         if (Time.time >= meleeStateEndTime)
         {
             meleeState = MeleeState.None;
+            agent.velocity = Vector3.zero;
+            agent.updateRotation = previousUpdateRotation;
         }
     }
 
@@ -261,6 +296,7 @@ public class EnemyAI : MonoBehaviour
     }
 
     private bool dying;
+    public bool IsAlive => !dying;
 
     public void TakeDamage(float damage)
     {
@@ -270,6 +306,7 @@ public class EnemyAI : MonoBehaviour
             dying = true;
             Die();
         }
+        Flash();
     }
 
     private void Die()
@@ -295,5 +332,31 @@ public class EnemyAI : MonoBehaviour
 
         transform.localScale = Vector3.zero;
         gameObject.SetActive(false);
+    }
+
+    private void Flash()
+    {
+        if (damageFlashCoroutine != null)
+            StopCoroutine(damageFlashCoroutine);
+        damageFlashCoroutine = StartCoroutine(_FlashRoutine());
+    }
+
+    private System.Collections.IEnumerator _FlashRoutine()
+    {
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.GetPropertyBlock(propBlock);
+            propBlock.SetColor(baseColor, Color.red);
+            renderer.SetPropertyBlock(propBlock);
+        }
+
+        yield return new WaitForSeconds(damageFlashDuration);
+
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.GetPropertyBlock(propBlock);
+            propBlock.SetColor(baseColor, new Color(0xE9 / 255f, 0xDF / 255f, 0xA6 / 255f));
+            renderer.SetPropertyBlock(propBlock);
+        }
     }
 }

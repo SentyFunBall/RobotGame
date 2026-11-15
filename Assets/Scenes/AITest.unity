@@ -449,8 +449,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachCameraToPlayer
   playerObj: {fileID: 1585576980}
-  posOff: {x: 0, y: 13.5, z: -6}
-  rotOff: {x: 63.4, y: 0, z: 0}
+  posOff: {x: 0, y: 13.5, z: 6}
+  rotOff: {x: 63.4, y: 180, z: 0}
   smoothFactor: 0.125
 --- !u!114 &330585549
 MonoBehaviour:
@@ -515,6 +515,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2587709234551510554, guid: cbeea6fd03786e145863f838de5caf01, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4181688245090753726, guid: cbeea6fd03786e145863f838de5caf01, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7415232064637410703, guid: cbeea6fd03786e145863f838de5caf01, type: 3}

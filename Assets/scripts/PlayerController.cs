@@ -45,8 +45,9 @@ public class PlayerController : MonoBehaviour
     private LayerMask enemyMask;
 
     [SerializeField]
-    private float attackCooldown = 2.0f;
-    private float nextAttackTime;
+    public float attackCooldown = 2.0f;
+
+    public float nextAttackTime;
 
     void Awake()
     {
@@ -81,7 +82,10 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         if (GetComponent<PlayerHealth>().Health <= 0)
+        {
+            moveInput = Vector2.zero;
             return;
+        }
 
         moveInput = controls.Player.Move.ReadValue<Vector2>();
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
@@ -92,11 +96,13 @@ public class PlayerController : MonoBehaviour
         if (controls.Player.Attack.triggered)
             doAttack = true;
 
-        /*bool t = controls.Player.DEBUGAddPowerUp.triggered;
+#if UNITY_EDITOR
+        bool t = controls.Player.DEBUGAddPowerUp.triggered;
         if (t)
         {
             powerUpManager.ActivatePowerUp(PowerUpType.Speed);
-        }*/
+        }
+#endif
     }
 
     void FixedUpdate()
@@ -185,9 +191,30 @@ public class PlayerController : MonoBehaviour
             Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
             // Cast from body height; the child pivot is at the feet, below enemy colliders
             Vector3 origin = playerCollider.bounds.center;
-            const float attackRadius = 0.5f;
+            const float attackRadius = 1.0f;
+            bool hitTarget = false;
+            Collider[] closeTargets = Physics.OverlapSphere(
+                origin,
+                attackRadius,
+                enemyMask,
+                QueryTriggerInteraction.Ignore
+            );
+            foreach (Collider closeTarget in closeTargets)
+            {
+                Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
+                if (targetOffset.sqrMagnitude < Mathf.Epsilon)
+                    targetOffset = closeTarget.bounds.center - origin;
+                targetOffset.y = 0f;
+                if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget))
+                {
+                    hitTarget = true;
+                    break;
+                }
+            }
+
             if (
-                Physics.SphereCast(
+                !hitTarget
+                && Physics.SphereCast(
                     origin,
                     attackRadius,
                     attackDir,
@@ -198,21 +225,30 @@ public class PlayerController : MonoBehaviour
                 )
             )
             {
-                EnemyAI enemy = hitInfo.collider.GetComponentInParent<EnemyAI>();
-                if (enemy != null)
-                {
-                    enemy.TakeDamage(attackDamage);
-                }
-                else
-                {
-                    RobotBossAI boss = hitInfo.collider.GetComponentInParent<RobotBossAI>();
-                    if (boss != null)
-                    {
-                        boss.TakeDamage(attackDamage);
-                    }
-                }
+                TryDamageTarget(hitInfo.collider);
             }
             characterAnimation.Attack();
         }
+    }
+
+    private bool TryDamageTarget(Collider targetCollider)
+    {
+        EnemyAI enemy = targetCollider.GetComponentInParent<EnemyAI>();
+        if (enemy != null)
+        {
+            enemy.TakeDamage(attackDamage);
+            Debug.Log("Hit");
+            return true;
+        }
+
+        RobotBossAI boss = targetCollider.GetComponentInParent<RobotBossAI>();
+        if (boss != null)
+        {
+            boss.TakeDamage(attackDamage);
+            Debug.Log("Hit Boss");
+            return true;
+        }
+
+        return false;
     }
 }

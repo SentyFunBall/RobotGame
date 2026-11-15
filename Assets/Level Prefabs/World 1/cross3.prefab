@@ -120,7 +120,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4af298a374fa6c342831b95d1c3cc5aa, type: 2}
+  - {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -267,7 +267,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4af298a374fa6c342831b95d1c3cc5aa, type: 2}
+  - {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -379,7 +379,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4af298a374fa6c342831b95d1c3cc5aa, type: 2}
+  - {fileID: 2100000, guid: 5eb36aaad42e3d54698d3df1e55c402b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -446,15 +446,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -22.88131
+      value: 5.05262
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.82409
+      value: 6.67202
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.75611
+      value: -6.1013
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -488,10 +488,34 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -5336039863243957805, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
+    - target: {fileID: -4139576257964613091, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
     - target: {fileID: 919132149155446097, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
       propertyPath: m_Name
       value: cross3
       objectReference: {fileID: 0}
+    - target: {fileID: 3868292229226770400, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
+    - target: {fileID: 3917353671108544536, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
+    - target: {fileID: 4471330098580007446, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
+    - target: {fileID: 7975763125364530792, guid: c4dc465b6ba28df40b275dc324d6444a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7da192132a6cc094bb8ad6fb6c9a9bb1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -566,8 +590,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifierVolume
   m_SerializedVersion: 0
-  m_Size: {x: 1.0758922, y: 1.0289483, z: 1.5449214}
-  m_Center: {x: -0.23294598, y: 0.7755258, z: -0.055774093}
+  m_Size: {x: 1.3410931, y: 1.5931764, z: 1.5449214}
+  m_Center: {x: -0.10034564, y: 1.0576398, z: -0.055774093}
   m_Area: 1
   m_AffectedAgents: ffffffff
 --- !u!1 &5310990802354993945 stripped
@@ -644,6 +668,10 @@ MonoBehaviour:
   South: {fileID: 0}
   East: {fileID: 0}
   West: {fileID: 0}
+  LinkNorth: {fileID: 0}
+  LinkSouth: {fileID: 0}
+  LinkEast: {fileID: 0}
+  LinkWest: {fileID: 0}
   DoorN: {fileID: 613792339915433346}
   DoorS: {fileID: 6327762258536956620}
   DoorE: {fileID: 8430804856546548561}
@@ -680,7 +708,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.13333334
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: fa65c0e5b3c14ce4ab77f3e4cf30abf3, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 4d528150cf8b5704a8dac35214d7bed5, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &6491557340283861380 stripped
 GameObject:
@@ -749,7 +777,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 0.625, z: 3}
+  m_Size: {x: 3.3, y: 0.625, z: 3.3}
   m_Center: {x: 0, y: -0.1875, z: 0}
 --- !u!4 &6775512717345681567 stripped
 Transform:

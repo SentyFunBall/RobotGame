@@ -19,7 +19,7 @@ public class WinOnZone : MonoBehaviour
 
             GameMenusController menus = FindAnyObjectByType<GameMenusController>();
             if (menus != null)
-                menus.ShowWinMenu();
+                LevelDirector.AdvanceToShop();
         }
     }
 }

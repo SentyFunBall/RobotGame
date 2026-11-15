@@ -78,13 +78,15 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   currentDetectionState: 0
+  damageFlashDuration: 0.1
   attackRange: 3
   attackDamage: 5
-  maxHealth: 10
+  maxHealth: 20
   enemyType: 0
   meleeWindupDelay: 0.82
-  lungeSpeed: 20
+  lungeSpeed: 10
   lungeDuration: 0.208
+  meleeWinddownDelay: 0.653
 --- !u!114 &6081913651945602409
 MonoBehaviour:
   m_ObjectHideFlags: 0
