@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using static SpawnUtility;
 
 public enum DetectionState
 {
@@ -72,6 +73,19 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float meleeWinddownDelay = 0.653f;
 
+    [SerializeField]
+    private AudioSource stepAudio;
+
+    [SerializeField]
+    private AudioSource hitAudio;
+
+    [SerializeField]
+    private AudioSource attackAudio;
+
+    [Header("Loot")]
+    [SerializeField]
+    private GameObject lootPrefab;
+
     private enum MeleeState
     {
         None,
@@ -91,6 +105,7 @@ public class EnemyAI : MonoBehaviour
     private Collider enemyCollider;
     private Collider playerCollider;
     private float nextAttackTime;
+    private Vector3 previousPosition;
 
     private CharacterAnimation characterAnimation;
 
@@ -104,6 +119,20 @@ public class EnemyAI : MonoBehaviour
 
         renderers = GetComponentsInChildren<Renderer>();
         propBlock = new MaterialPropertyBlock();
+
+        if (stepAudio != null)
+            stepAudio.loop = true;
+    }
+
+    private void OnEnable()
+    {
+        previousPosition = transform.position;
+    }
+
+    private void OnDisable()
+    {
+        if (stepAudio != null)
+            stepAudio.Stop();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -175,6 +204,24 @@ public class EnemyAI : MonoBehaviour
         }
 
         UpdateAnimatorSpeed();
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 position = transform.position;
+        if (stepAudio != null)
+        {
+            bool moving =
+                agent.isActiveAndEnabled
+                && Time.timeScale > 0f
+                && (position - previousPosition).sqrMagnitude > 0f
+                && !agent.isStopped;
+            if (moving && !stepAudio.isPlaying)
+                stepAudio.Play();
+            else if (!moving && stepAudio.isPlaying)
+                stepAudio.Stop();
+        }
+        previousPosition = position;
     }
 
     private void UpdateAnimatorSpeed()
@@ -272,26 +319,26 @@ public class EnemyAI : MonoBehaviour
 
     private void Attack()
     {
+        if (Time.time < nextAttackTime)
+            return;
+
+        if (attackAudio != null && attackAudio.clip != null)
+            attackAudio.PlayOneShot(attackAudio.clip);
+
         if (enemyType == EnemyType.Melee)
         {
-            if (Time.time >= nextAttackTime)
-            {
-                StartMeleeAttack();
-            }
+            StartMeleeAttack();
             return;
         }
 
-        if (Time.time >= nextAttackTime)
-        {
-            characterAnimation.Attack();
-            nextAttackTime = Time.time + 3f; // Assuming 3 second cooldown between attacks
+        characterAnimation.Attack();
+        nextAttackTime = Time.time + 3f; // Assuming 3 second cooldown between attacks
 
-            // Apply damage to the player
-            PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(attackDamage);
-            }
+        // Apply damage to the player
+        PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(attackDamage);
         }
     }
 
@@ -302,7 +349,9 @@ public class EnemyAI : MonoBehaviour
     {
         health -= damage;
         if (GetComponent<AudioSource>() != null)
-            GetComponent<AudioSource>().Play();
+        {
+            hitAudio.Play();
+        }
         if (health <= 0f && !dying)
         {
             dying = true;
@@ -315,9 +364,24 @@ public class EnemyAI : MonoBehaviour
     {
         characterAnimation.SetDead(true);
         agent.enabled = false;
+        if (stepAudio != null)
+            stepAudio.Stop();
         if (enemyCollider != null)
             enemyCollider.enabled = false;
+        SpawnLoot();
         StartCoroutine(ShrinkAndDisable());
+    }
+
+    private void SpawnLoot()
+    {
+        if (lootPrefab == null)
+            return;
+
+        if (TryGetRandomNavMeshPosition(transform.position, 2f, out Vector3 spawnPosition))
+        {
+            GameObject newLoot = Instantiate(lootPrefab);
+            newLoot.transform.position = spawnPosition;
+        }
     }
 
     private System.Collections.IEnumerator ShrinkAndDisable()

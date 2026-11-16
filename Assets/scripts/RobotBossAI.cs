@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using static SpawnUtility;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class RobotBossAI : MonoBehaviour
@@ -51,6 +52,10 @@ public class RobotBossAI : MonoBehaviour
 
     [SerializeField]
     private float upwardArc = 4f;
+
+    [Header("Loot")]
+    [SerializeField]
+    private GameObject lootPrefab;
 
     private Transform player;
     private NavMeshAgent agent;
@@ -248,6 +253,7 @@ public class RobotBossAI : MonoBehaviour
     {
         isDead = true;
         StopAllCoroutines();
+        SpawnLoot();
 
         if (agent.isActiveAndEnabled && agent.isOnNavMesh)
             agent.isStopped = true;
@@ -260,6 +266,18 @@ public class RobotBossAI : MonoBehaviour
             col.enabled = false;
 
         StartCoroutine(ShrinkAndDisable());
+    }
+
+    private void SpawnLoot()
+    {
+        if (lootPrefab == null)
+            return;
+
+        if (TryGetRandomNavMeshPosition(transform.position, 3f, out Vector3 spawnPosition))
+        {
+            GameObject newLoot = Instantiate(lootPrefab);
+            newLoot.transform.position = spawnPosition;
+        }
     }
 
     private IEnumerator ShrinkAndDisable()

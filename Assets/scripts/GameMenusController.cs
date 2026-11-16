@@ -27,6 +27,9 @@ public class GameMenusController : MonoBehaviour
     [SerializeField]
     private GameObject shopMenu;
 
+    [SerializeField]
+    private GameObject playerSprintSlider;
+
     private InputSystem_Actions controls;
     private bool shownBossUI = false;
 
@@ -38,6 +41,18 @@ public class GameMenusController : MonoBehaviour
         winMenu.SetActive(false);
         bossUI.SetActive(false);
         shopMenu.SetActive(false);
+        playerSprintSlider.SetActive(false);
+        
+        // Wire sprint slider to player
+        if (player != null)
+        {
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            if (playerController != null && playerSprintSlider != null)
+            {
+                UnityEngine.UI.Slider slider = playerSprintSlider.GetComponent<UnityEngine.UI.Slider>();
+                playerController.SetSprintSlider(slider);
+            }
+        }
     }
 
     void FindBoss()
@@ -68,7 +83,7 @@ public class GameMenusController : MonoBehaviour
     void Update()
     {
         bool isPausePressed = controls.UI.Pause.triggered;
-        if (isPausePressed)
+        if (isPausePressed && !shopMenu.activeSelf)
         {
             isPaused = !isPaused;
             if (isPaused)
@@ -76,6 +91,7 @@ public class GameMenusController : MonoBehaviour
             else
                 Resume();
         }
+        playerSprintSlider.SetActive(PowerUpManager.instance.IsPowerUpActive(PowerUpType.Speed));
 
         // Update boss UI healthbar
         if (boss != null)
@@ -132,7 +148,7 @@ public class GameMenusController : MonoBehaviour
         winMenu.SetActive(true);
         Time.timeScale = 0f;
         GameObject lootText = winMenu.transform.Find("loottx").gameObject;
-        lootText.GetComponent<TextMeshProUGUI>().text = "Loot Collected: " + PickupLoot.lootCount;
+        lootText.GetComponent<TextMeshProUGUI>().text = "Loot Remaining: " + PickupLoot.lootCount;
         bossUI.SetActive(false);
     }
 
@@ -147,6 +163,11 @@ public class GameMenusController : MonoBehaviour
     {
         Time.timeScale = 0f;
         shopMenu.SetActive(true);
+        Shop shop = shopMenu.GetComponent<Shop>();
+        if (shop != null)
+            shop.Open(player);
+        else
+            Debug.LogError("Shop component not found on the shop menu.", shopMenu);
     }
 
     public bool IsBossUIActive()

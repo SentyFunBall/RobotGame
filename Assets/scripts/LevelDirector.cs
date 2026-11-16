@@ -22,6 +22,8 @@ public class LevelDirector : MonoBehaviour
 
     void Start()
     {
+        currentLevelState = LevelState.Stage1;
+        PickupLoot.lootCount = 0;
         player = GameObject.FindWithTag("Player");
         dungeonGenerator = FindAnyObjectByType<DungeonGenerator>();
         if (dungeonGenerator == null)
@@ -117,7 +119,7 @@ public class LevelDirector : MonoBehaviour
     private IEnumerator StartBossFight(DungeonRoom room)
     {
         if (bossStart != null)
-            AudioSource.PlayClipAtPoint(bossStart, player.transform.position);
+            AudioSource.PlayClipAtPoint(bossStart, player.transform.position, 2.0f);
         else
             Debug.LogError("Boss start sound is not assigned.", this);
 
@@ -145,12 +147,12 @@ public class LevelDirector : MonoBehaviour
     }
 
     // Called by the shop to advance to the next level
-    public static void AdvanceLevel()
+    public void AdvanceLevel()
     {
         if (currentLevelState == LevelState.Shop1)
             currentLevelState = LevelState.Stage2;
-        else if (currentLevelState == LevelState.Stage2)
-            currentLevelState = LevelState.Shop2;
+        else if (currentLevelState != LevelState.Shop2)
+            return;
 
         GameMenusController menus = FindAnyObjectByType<GameMenusController>();
         if (menus != null)
@@ -171,8 +173,8 @@ public class LevelDirector : MonoBehaviour
         }
         else if (currentLevelState == LevelState.Shop2)
         {
-            menus.Resume();
-            menus.ShowWinMenu();
+            if (menus != null)
+                menus.ShowWinMenu();
         }
     }
 
@@ -182,6 +184,8 @@ public class LevelDirector : MonoBehaviour
             currentLevelState = LevelState.Shop1;
         else if (currentLevelState == LevelState.Stage2)
             currentLevelState = LevelState.Shop2;
+        else
+            return;
 
         GameMenusController menus = FindAnyObjectByType<GameMenusController>();
         if (menus != null)

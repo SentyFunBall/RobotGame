@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CharacterAnimation))]
+[RequireComponent(typeof(WeaponManager))]
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
@@ -25,6 +27,19 @@ public class PlayerController : MonoBehaviour
     private float sprintMod = 1.5f;
 
     [SerializeField]
+    private float sprintTime = 1.0f;
+
+    [SerializeField]
+    private float sprintCooldown = 4.0f;
+
+    private float sprintTimeRemaining;
+    private float sprintCooldownRemaining;
+    private bool sprintCooldownActive;
+
+    [SerializeField]
+    private Slider sprintBar;
+
+    [SerializeField]
     private LayerMask groundMask;
 
     [SerializeField]
@@ -38,6 +53,7 @@ public class PlayerController : MonoBehaviour
     private AudioSource rollingAudio;
 
     private PowerUpManager powerUpManager;
+    private WeaponManager weaponManager;
     private CharacterAnimation characterAnimation;
     private bool grounded;
 
@@ -62,6 +78,7 @@ public class PlayerController : MonoBehaviour
         controls = new InputSystem_Actions();
         characterAnimation = GetComponent<CharacterAnimation>();
         characterAnimation.FindAndSetAnimator();
+        weaponManager = GetComponent<WeaponManager>();
     }
 
     void OnEnable()
@@ -91,6 +108,19 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("Player attack audio source or clip is not assigned.", this);
         if (rollingAudio == null || rollingAudio.clip == null)
             Debug.LogError("Player rolling audio source or clip is not assigned.", this);
+        
+        sprintTimeRemaining = sprintTime;
+        sprintCooldownRemaining = 0f;
+        sprintCooldownActive = false;
+        
+        if (sprintBar == null)
+        {
+            Debug.LogError("SprintBar slider not assigned.", this);
+        }
+        else
+        {
+            sprintBar.value = 1f;
+        }
     }
 
     // Update is called once per frame
@@ -99,6 +129,15 @@ public class PlayerController : MonoBehaviour
         if (GetComponent<PlayerHealth>().Health <= 0)
         {
             moveInput = Vector2.zero;
+            if (rollingAudio != null && rollingAudio.isPlaying)
+                rollingAudio.Stop();
+            return;
+        }
+
+        if (Time.timeScale == 0f)
+        {
+            moveInput = Vector2.zero;
+            doAttack = false;
             if (rollingAudio != null && rollingAudio.isPlaying)
                 rollingAudio.Stop();
             return;
@@ -119,8 +158,60 @@ public class PlayerController : MonoBehaviour
 
         moveInput = controls.Player.Move.ReadValue<Vector2>();
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
-        isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
         isSpeedPowerUpActive = powerUpManager.IsPowerUpActive(PowerUpType.Speed);
+        
+        // Handle sprint cooldown
+        if (isSpeedPowerUpActive)
+        {
+            if (sprintCooldownActive)
+            {
+                sprintCooldownRemaining -= Time.deltaTime;
+                if (sprintCooldownRemaining <= 0f)
+                {
+                    sprintCooldownActive = false;
+                    sprintTimeRemaining = sprintTime;
+                    sprintCooldownRemaining = 0f;
+                }
+            }
+            
+            isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
+            
+            // Only allow sprinting if not in cooldown and have time remaining
+            if (isSprint && !sprintCooldownActive)
+            {
+                sprintTimeRemaining -= Time.deltaTime;
+                if (sprintTimeRemaining <= 0f)
+                {
+                    sprintTimeRemaining = 0f;
+                    sprintCooldownActive = true;
+                    sprintCooldownRemaining = sprintCooldown;
+                    isSprint = false;
+                }
+            }
+            else
+            {
+                isSprint = false;
+            }
+            
+            // Update sprint bar
+            if (sprintBar != null)
+            {
+                if (sprintCooldownActive)
+                {
+                    // Show elapsed cooldown time (empty to full as cooldown completes)
+                    sprintBar.value = 1.0f - (sprintCooldownRemaining / sprintCooldown);
+                }
+                else
+                {
+                    sprintBar.value = sprintTimeRemaining / sprintTime;
+                }
+            }
+        }
+        else
+        {
+            isSprint = false;
+        }
+        
         // Latch the press: Update can run several times between FixedUpdates, and
         // overwriting with `triggered` each frame dropped most attack inputs
         if (controls.Player.Attack.triggered)
@@ -131,6 +222,9 @@ public class PlayerController : MonoBehaviour
         if (t)
         {
             powerUpManager.ActivatePowerUp(PowerUpType.Speed);
+            sprintTimeRemaining = sprintTime;
+            sprintCooldownRemaining = 0f;
+            sprintCooldownActive = false;
         }
 #endif
     }
@@ -250,14 +344,20 @@ public class PlayerController : MonoBehaviour
                     attackRadius,
                     attackDir,
                     out RaycastHit hitInfo,
-                    attackRange,
+                    Mathf.Max(
+                        0f,
+                        attackRange
+                            + (
+                                weaponManager.EquippedWeapon != null
+                                    ? weaponManager.EquippedWeapon.weaponRangeBonus
+                                    : 0f
+                            )
+                    ),
                     enemyMask,
                     QueryTriggerInteraction.Ignore
                 )
             )
             {
-                if (attackAudio != null)
-                    attackAudio.Play();
                 TryDamageTarget(hitInfo.collider);
             }
             characterAnimation.Attack();
@@ -266,22 +366,47 @@ public class PlayerController : MonoBehaviour
 
     private bool TryDamageTarget(Collider targetCollider)
     {
+        float damage = Mathf.Max(
+            0f,
+            attackDamage
+                + (
+                    weaponManager.EquippedWeapon != null
+                        ? weaponManager.EquippedWeapon.weaponDamageBonus
+                        : 0f
+                )
+        );
         EnemyAI enemy = targetCollider.GetComponentInParent<EnemyAI>();
         if (enemy != null)
         {
-            enemy.TakeDamage(attackDamage);
+            enemy.TakeDamage(damage);
             Debug.Log("Hit");
+
+            if (attackAudio != null)
+                attackAudio.Play();
             return true;
         }
 
         RobotBossAI boss = targetCollider.GetComponentInParent<RobotBossAI>();
         if (boss != null)
         {
-            boss.TakeDamage(attackDamage);
+            boss.TakeDamage(damage);
             Debug.Log("Hit Boss");
+
+            if (attackAudio != null)
+                attackAudio.Play();
+
             return true;
         }
 
         return false;
+    }
+
+    public void SetSprintSlider(Slider slider)
+    {
+        sprintBar = slider;
+        if (sprintBar != null)
+        {
+            sprintBar.value = 1f;
+        }
     }
 }

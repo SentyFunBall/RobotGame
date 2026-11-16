@@ -868,7 +868,7 @@ public class DungeonGenerator : MonoBehaviour
         BossDefeated = robotBossPrefab == null || endRoom == null;
         if (robotBossPrefab != null && endRoom != null)
         {
-            Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 31f, endRoom.GridPosition.z);
+            Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 7f, endRoom.GridPosition.z);
             GameObject boss = Instantiate(robotBossPrefab, spawnPos, Quaternion.identity);
             boss.transform.SetParent(endRoom.transform, true);
             RobotBossAI bossAI = boss.GetComponent<RobotBossAI>();

@@ -193,6 +193,7 @@ MonoBehaviour:
   throwCooldown: 8
   throwForce: 22
   upwardArc: 4
+  lootPrefab: {fileID: 9085376655905517556, guid: 7ae8afebc6aae4ba0bfcd527376ebfc3, type: 3}
 --- !u!4 &1041060264554707883 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: af76af824b28b3e4c886f28fe92035ec, type: 3}
