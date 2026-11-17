@@ -193,4 +193,13 @@ public class LevelDirector : MonoBehaviour
             menus.ShowShopMenu();
         }
     }
+
+    public static void ShowWeaponSelect()
+    {
+        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
+        if (menus != null)
+        {
+            menus.ShowWeaponSelectMenu();
+        }
+    }
 }

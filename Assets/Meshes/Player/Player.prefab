@@ -109,6 +109,9 @@ MonoBehaviour:
   moveSpeed: 7
   slowMod: 0.5
   sprintMod: 1.5
+  sprintTime: 1
+  sprintCooldown: 4
+  sprintBar: {fileID: 0}
   groundMask:
     serializedVersion: 2
     m_Bits: 1
@@ -122,18 +125,7 @@ MonoBehaviour:
     m_Bits: 256
   attackCooldown: 1
   nextAttackTime: 0
---- !u!114 &681032447000010001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2624497831410241344}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cfc7a3bc5e44c9bb6a52efdd8e51247, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
+  bulletPrefab: {fileID: 5578728262812579440, guid: 7649b6178046cda47b925ebb23934947, type: 3}
 --- !u!114 &812377548209013917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,7 +399,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: b55685e3334e9194bb90b3fb982f2efc, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.631
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -491,6 +483,18 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &681032447000010001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2624497831410241344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cfc7a3bc5e44c9bb6a52efdd8e51247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
 --- !u!1001 &1980869588265812913
 PrefabInstance:
   m_ObjectHideFlags: 0

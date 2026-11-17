@@ -184,6 +184,10 @@ public class EnemyAI : MonoBehaviour
                 detectionRadius = detectionRadiusSneak;
                 break;
         }
+        if (PowerUpManager.instance.IsPowerUpActive(PowerUpType.Stealth))
+        {
+            detectionRadius *= 0.5f; // Reduce detection radius by 50% if Stealth power-up is active
+        }
 
         if (distance <= detectionRadius)
         {
@@ -313,7 +317,9 @@ public class EnemyAI : MonoBehaviour
         PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
         if (playerHealth != null)
         {
-            playerHealth.TakeDamage(attackDamage);
+            playerHealth.TakeDamage(
+                attackDamage * DungeonGenerator.Instance.Difficulty.EnemyStrength
+            );
         }
     }
 
@@ -338,7 +344,9 @@ public class EnemyAI : MonoBehaviour
         PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
         if (playerHealth != null)
         {
-            playerHealth.TakeDamage(attackDamage);
+            playerHealth.TakeDamage(
+                attackDamage * DungeonGenerator.Instance.Difficulty.EnemyStrength
+            );
         }
     }
 

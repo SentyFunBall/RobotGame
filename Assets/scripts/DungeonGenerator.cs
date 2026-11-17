@@ -6,8 +6,8 @@ using UnityEngine;
 [System.Serializable]
 public class DungeonDifficulty
 {
-    [Range(0, 100)]
-    public int EnemyStrength;
+    [Range(0, 5)]
+    public float EnemyStrength;
 
     [Range(0, 100)]
     public int PuzzleComplexity;
@@ -23,6 +23,9 @@ public class DungeonDifficulty
 
     [Range(0, 100)]
     public int numberOfEnemies;
+
+    [Range(0, 10)]
+    public int shopItemCostMult;
 }
 
 public struct OpenConnection
@@ -107,31 +110,34 @@ public class DungeonGenerator : MonoBehaviour
         switch (difficultyName)
         {
             case "Easy":
-                Difficulty.EnemyStrength = 5;
+                Difficulty.EnemyStrength = 0.7f;
                 Difficulty.PuzzleComplexity = 5;
                 Difficulty.TrapFrequency = 5;
                 Difficulty.Size = 12;
                 Difficulty.RoomCount = 15;
                 Difficulty.numberOfEnemies = 5;
+                Difficulty.shopItemCostMult = 1;
                 break;
 
             case "Hard":
-                Difficulty.EnemyStrength = 45;
+                Difficulty.EnemyStrength = 2.0f;
                 Difficulty.PuzzleComplexity = 45;
                 Difficulty.TrapFrequency = 45;
                 Difficulty.Size = 12;
                 Difficulty.RoomCount = 50;
                 Difficulty.numberOfEnemies = 20;
+                Difficulty.shopItemCostMult = 5;
                 break;
 
             case "Medium":
             default:
-                Difficulty.EnemyStrength = 25;
+                Difficulty.EnemyStrength = 1.0f;
                 Difficulty.PuzzleComplexity = 25;
                 Difficulty.TrapFrequency = 25;
                 Difficulty.Size = 12;
-                Difficulty.RoomCount = 30;
-                Difficulty.numberOfEnemies = 12;
+                Difficulty.RoomCount = 50;
+                Difficulty.numberOfEnemies = 25;
+                Difficulty.shopItemCostMult = 2;
                 break;
         }
     }

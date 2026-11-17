@@ -68,6 +68,10 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        if (PowerUpManager.instance.IsPowerUpActive(PowerUpType.Armor))
+        {
+            damage *= 0.5f; // Reduce damage by 50% if Armor power-up is active
+        }
         health -= damage;
         if (health < 0)
             health = 0;

@@ -99,7 +99,8 @@ public class Shop : MonoBehaviour
             || sold[slot]
             || !IsValid(item)
             || IsOwned(item)
-            || PickupLoot.lootCount < item.price
+            || PickupLoot.lootCount
+                < item.price * DungeonGenerator.Instance.Difficulty.shopItemCostMult
         )
             return false;
 
@@ -113,7 +114,7 @@ public class Shop : MonoBehaviour
             powerUps.ActivatePowerUp(item.powerUpType);
         }
 
-        PickupLoot.lootCount -= item.price;
+        PickupLoot.lootCount -= item.price * DungeonGenerator.Instance.Difficulty.shopItemCostMult;
         sold[slot] = true;
         RefreshUI();
         return true;
@@ -152,14 +153,18 @@ public class Shop : MonoBehaviour
                     : $"{item.price} loot";
                 labels[i].text = $"{item.itemName}\n{item.description}\n{status}";
                 buttons[i].interactable =
-                    !sold[i] && !IsOwned(item) && PickupLoot.lootCount >= item.price;
+                    !sold[i]
+                    && !IsOwned(item)
+                    && PickupLoot.lootCount
+                        >= item.price * DungeonGenerator.Instance.Difficulty.shopItemCostMult;
             }
         }
     }
 
     private void CreateUI()
     {
-        balanceText = CreateText(
+        balanceText = ShopItemUI.CreateText(
+            textTemplate,
             "Shop balance",
             transform,
             new Vector2(0f, 245f),
@@ -168,55 +173,91 @@ public class Shop : MonoBehaviour
         balanceText.fontSize = 30f;
         for (int i = 0; i < buttons.Length; i++)
         {
-            GameObject card = new GameObject(
+            ShopItemUI.CreateCard(
                 $"Shop slot {i + 1}",
-                typeof(RectTransform),
-                typeof(Image),
-                typeof(Button)
+                transform,
+                textTemplate,
+                new Vector2((i - 1) * 270f, -20f),
+                out buttons[i],
+                out icons[i],
+                out labels[i]
             );
-            card.layer = gameObject.layer;
-            RectTransform rect = (RectTransform)card.transform;
-            rect.SetParent(transform, false);
-            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = new Vector2((i - 1) * 270f, -20f);
-            rect.sizeDelta = new Vector2(245f, 410f);
-
-            Image background = card.GetComponent<Image>();
-            background.color = new Color(0.18f, 0.18f, 0.18f, 0.95f);
-            buttons[i] = card.GetComponent<Button>();
-            buttons[i].targetGraphic = background;
             int slot = i;
             buttons[i].onClick.AddListener(() => TryPurchase(slot));
-
-            GameObject iconObject = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-            iconObject.layer = gameObject.layer;
-            RectTransform iconRect = (RectTransform)iconObject.transform;
-            iconRect.SetParent(rect, false);
-            iconRect.anchorMin = iconRect.anchorMax = new Vector2(0.5f, 0.5f);
-            iconRect.anchoredPosition = new Vector2(0f, 115f);
-            iconRect.sizeDelta = new Vector2(110f, 110f);
-            icons[i] = iconObject.GetComponent<Image>();
-            icons[i].preserveAspect = true;
-            icons[i].raycastTarget = false;
-
-            labels[i] = CreateText(
-                "Item details",
-                rect,
-                new Vector2(0f, -60f),
-                new Vector2(220f, 220f)
-            );
-            labels[i].fontSize = 24f;
         }
     }
 
-    private TextMeshProUGUI CreateText(
+    public ShopItem GetShopItem(string name)
+    {
+        foreach (ShopItem item in possibleItems)
+        {
+            if (item.name == name)
+                return item;
+        }
+        return null;
+    }
+}
+
+internal static class ShopItemUI
+{
+    public static void CreateCard(
+        string objectName,
+        Transform parent,
+        TextMeshProUGUI template,
+        Vector2 position,
+        out Button button,
+        out Image icon,
+        out TextMeshProUGUI label
+    )
+    {
+        GameObject card = new GameObject(
+            objectName,
+            typeof(RectTransform),
+            typeof(Image),
+            typeof(Button)
+        );
+        card.layer = parent.gameObject.layer;
+        RectTransform rect = (RectTransform)card.transform;
+        rect.SetParent(parent, false);
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = new Vector2(245f, 410f);
+
+        Image background = card.GetComponent<Image>();
+        background.color = new Color(0.18f, 0.18f, 0.18f, 0.95f);
+        button = card.GetComponent<Button>();
+        button.targetGraphic = background;
+
+        GameObject iconObject = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+        iconObject.layer = parent.gameObject.layer;
+        RectTransform iconRect = (RectTransform)iconObject.transform;
+        iconRect.SetParent(rect, false);
+        iconRect.anchorMin = iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        iconRect.anchoredPosition = new Vector2(0f, 115f);
+        iconRect.sizeDelta = new Vector2(110f, 110f);
+        icon = iconObject.GetComponent<Image>();
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+
+        label = CreateText(
+            template,
+            "Item details",
+            rect,
+            new Vector2(0f, -60f),
+            new Vector2(220f, 220f)
+        );
+        label.fontSize = 24f;
+    }
+
+    public static TextMeshProUGUI CreateText(
+        TextMeshProUGUI template,
         string objectName,
         Transform parent,
         Vector2 position,
         Vector2 size
     )
     {
-        TextMeshProUGUI text = Instantiate(textTemplate, parent);
+        TextMeshProUGUI text = Object.Instantiate(template, parent);
         text.gameObject.name = objectName;
         RectTransform rect = text.rectTransform;
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);

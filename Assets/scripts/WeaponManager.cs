@@ -38,4 +38,9 @@ public class WeaponManager : MonoBehaviour
         EquippedWeapon = weapon;
         return true;
     }
+
+    public bool HasAnyWeapon()
+    {
+        return weapons.Count > 0;
+    }
 }

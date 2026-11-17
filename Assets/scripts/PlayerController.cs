@@ -73,6 +73,9 @@ public class PlayerController : MonoBehaviour
 
     public float nextAttackTime;
 
+    [SerializeField]
+    private GameObject bulletPrefab;
+
     void Awake()
     {
         controls = new InputSystem_Actions();
@@ -108,11 +111,11 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("Player attack audio source or clip is not assigned.", this);
         if (rollingAudio == null || rollingAudio.clip == null)
             Debug.LogError("Player rolling audio source or clip is not assigned.", this);
-        
+
         sprintTimeRemaining = sprintTime;
         sprintCooldownRemaining = 0f;
         sprintCooldownActive = false;
-        
+
         if (sprintBar == null)
         {
             Debug.LogError("SprintBar slider not assigned.", this);
@@ -126,6 +129,14 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (powerUpManager.IsPowerUpActive(PowerUpType.Stealth))
+        {
+            rollingAudio.volume = 0.0585f; // Reduce volume by 50% if Stealth power-up is active
+        }
+        else
+        {
+            rollingAudio.volume = 0.117f;
+        }
         if (GetComponent<PlayerHealth>().Health <= 0)
         {
             moveInput = Vector2.zero;
@@ -159,7 +170,7 @@ public class PlayerController : MonoBehaviour
         moveInput = controls.Player.Move.ReadValue<Vector2>();
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
         isSpeedPowerUpActive = powerUpManager.IsPowerUpActive(PowerUpType.Speed);
-        
+
         // Handle sprint cooldown
         if (isSpeedPowerUpActive)
         {
@@ -173,9 +184,9 @@ public class PlayerController : MonoBehaviour
                     sprintCooldownRemaining = 0f;
                 }
             }
-            
+
             isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
-            
+
             // Only allow sprinting if not in cooldown and have time remaining
             if (isSprint && !sprintCooldownActive)
             {
@@ -192,7 +203,7 @@ public class PlayerController : MonoBehaviour
             {
                 isSprint = false;
             }
-            
+
             // Update sprint bar
             if (sprintBar != null)
             {
@@ -211,7 +222,7 @@ public class PlayerController : MonoBehaviour
         {
             isSprint = false;
         }
-        
+
         // Latch the press: Update can run several times between FixedUpdates, and
         // overwriting with `triggered` each frame dropped most attack inputs
         if (controls.Player.Attack.triggered)
@@ -299,9 +310,15 @@ public class PlayerController : MonoBehaviour
         if (characterAnimation != null)
         {
             if (isSprint && isSpeedPowerUpActive)
+            {
                 characterAnimation.Sprint(speed);
+                Debug.Log("Sprint: " + speed);
+            }
             else
+            {
+                characterAnimation.Sprint(0);
                 characterAnimation.SetMovementSpeed(speed);
+            }
         }
 
         // Attack
@@ -312,55 +329,7 @@ public class PlayerController : MonoBehaviour
                 return;
             nextAttackTime = Time.time + attackCooldown;
 
-            Transform playerChild = transform.GetChild(0);
-            Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
-            // Cast from body height; the child pivot is at the feet, below enemy colliders
-            Vector3 origin = playerCollider.bounds.center;
-            const float attackRadius = 1.0f;
-            bool hitTarget = false;
-            Collider[] closeTargets = Physics.OverlapSphere(
-                origin,
-                attackRadius,
-                enemyMask,
-                QueryTriggerInteraction.Ignore
-            );
-            foreach (Collider closeTarget in closeTargets)
-            {
-                Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
-                if (targetOffset.sqrMagnitude < Mathf.Epsilon)
-                    targetOffset = closeTarget.bounds.center - origin;
-                targetOffset.y = 0f;
-                if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget))
-                {
-                    hitTarget = true;
-                    break;
-                }
-            }
-
-            if (
-                !hitTarget
-                && Physics.SphereCast(
-                    origin,
-                    attackRadius,
-                    attackDir,
-                    out RaycastHit hitInfo,
-                    Mathf.Max(
-                        0f,
-                        attackRange
-                            + (
-                                weaponManager.EquippedWeapon != null
-                                    ? weaponManager.EquippedWeapon.weaponRangeBonus
-                                    : 0f
-                            )
-                    ),
-                    enemyMask,
-                    QueryTriggerInteraction.Ignore
-                )
-            )
-            {
-                TryDamageTarget(hitInfo.collider);
-            }
-            characterAnimation.Attack();
+            DoRegularAttack();
         }
     }
 
@@ -371,7 +340,7 @@ public class PlayerController : MonoBehaviour
             attackDamage
                 + (
                     weaponManager.EquippedWeapon != null
-                        ? weaponManager.EquippedWeapon.weaponDamageBonus
+                        ? weaponManager.EquippedWeapon.weaponDamage
                         : 0f
                 )
         );
@@ -408,5 +377,74 @@ public class PlayerController : MonoBehaviour
         {
             sprintBar.value = 1f;
         }
+    }
+
+    private void DoRegularAttack()
+    {
+        Transform playerChild = transform.GetChild(0);
+        Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+        // Cast from body height; the child pivot is at the feet, below enemy colliders
+        Vector3 origin = playerCollider.bounds.center;
+        const float attackRadius = 1.0f;
+        bool hitTarget = false;
+        Collider[] closeTargets = Physics.OverlapSphere(
+            origin,
+            attackRadius,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+        foreach (Collider closeTarget in closeTargets)
+        {
+            Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
+            if (targetOffset.sqrMagnitude < Mathf.Epsilon)
+                targetOffset = closeTarget.bounds.center - origin;
+            targetOffset.y = 0f;
+            if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget))
+            {
+                hitTarget = true;
+                break;
+            }
+        }
+
+        if (
+            !hitTarget
+            && Physics.SphereCast(
+                origin,
+                attackRadius,
+                attackDir,
+                out RaycastHit hitInfo,
+                Mathf.Max(
+                    0f,
+                    attackRange
+                        + (
+                            weaponManager.EquippedWeapon != null
+                                ? weaponManager.EquippedWeapon.weaponRange
+                                : 0f
+                        )
+                ),
+                enemyMask,
+                QueryTriggerInteraction.Ignore
+            )
+        )
+        {
+            TryDamageTarget(hitInfo.collider);
+        }
+        if (!GetComponent<WeaponManager>().HasAnyWeapon())
+            characterAnimation.Attack();
+        else
+        {
+            GameObject bullet = Instantiate(
+                bulletPrefab,
+                transform.position + transform.forward,
+                Quaternion.identity
+            );
+            bullet.GetComponent<Rigidbody>().linearVelocity = transform.forward * 10f;
+            despawnBulletAfterDelay(bullet, 3f);
+        }
+    }
+
+    private void despawnBulletAfterDelay(GameObject bullet, float delay)
+    {
+        Destroy(bullet, delay);
     }
 }

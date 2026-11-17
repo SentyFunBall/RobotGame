@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameMenusController : MonoBehaviour
 {
@@ -28,7 +28,22 @@ public class GameMenusController : MonoBehaviour
     private GameObject shopMenu;
 
     [SerializeField]
+    private GameObject weaponSelectMenu;
+
+    [SerializeField]
     private GameObject playerSprintSlider;
+
+    [SerializeField]
+    private GameObject armorIcon;
+
+    [SerializeField]
+    private GameObject stealthIcon;
+
+    [SerializeField]
+    private Image equippedWeaponIcon;
+
+    [SerializeField]
+    private GameObject equippedWeaponIconGO;
 
     private InputSystem_Actions controls;
     private bool shownBossUI = false;
@@ -41,15 +56,16 @@ public class GameMenusController : MonoBehaviour
         winMenu.SetActive(false);
         bossUI.SetActive(false);
         shopMenu.SetActive(false);
+        weaponSelectMenu.SetActive(false);
         playerSprintSlider.SetActive(false);
-        
+
         // Wire sprint slider to player
         if (player != null)
         {
             PlayerController playerController = player.GetComponent<PlayerController>();
             if (playerController != null && playerSprintSlider != null)
             {
-                UnityEngine.UI.Slider slider = playerSprintSlider.GetComponent<UnityEngine.UI.Slider>();
+                Slider slider = playerSprintSlider.GetComponent<Slider>();
                 playerController.SetSprintSlider(slider);
             }
         }
@@ -83,7 +99,7 @@ public class GameMenusController : MonoBehaviour
     void Update()
     {
         bool isPausePressed = controls.UI.Pause.triggered;
-        if (isPausePressed && !shopMenu.activeSelf)
+        if (isPausePressed && !shopMenu.activeSelf && !weaponSelectMenu.activeSelf)
         {
             isPaused = !isPaused;
             if (isPaused)
@@ -106,6 +122,20 @@ public class GameMenusController : MonoBehaviour
                 bossUI.SetActive(false);
             }
         }
+
+        // Update armor and stealth icons
+        if (armorIcon != null)
+            armorIcon.SetActive(PowerUpManager.instance.IsPowerUpActive(PowerUpType.Armor));
+        if (stealthIcon != null)
+            stealthIcon.SetActive(PowerUpManager.instance.IsPowerUpActive(PowerUpType.Stealth));
+
+        if (equippedWeaponIconGO != null)
+        {
+            equippedWeaponIconGO.SetActive(
+                player != null && player.GetComponent<WeaponManager>().HasAnyWeapon()
+            );
+            equippedWeaponIcon.sprite = player.GetComponent<WeaponManager>().EquippedWeapon?.icon;
+        }
     }
 
     public void Pause()
@@ -118,6 +148,7 @@ public class GameMenusController : MonoBehaviour
     {
         pauseMenu.SetActive(false);
         shopMenu.SetActive(false);
+        weaponSelectMenu.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
     }
@@ -173,5 +204,24 @@ public class GameMenusController : MonoBehaviour
     public bool IsBossUIActive()
     {
         return shownBossUI;
+    }
+
+    public void ShowWeaponSelectMenu()
+    {
+        WeaponEquipper equipper = weaponSelectMenu.GetComponent<WeaponEquipper>();
+        if (equipper == null)
+        {
+            Debug.LogError(
+                "WeaponEquipper component not found on the weapon selection menu.",
+                weaponSelectMenu
+            );
+            return;
+        }
+        if (!equipper.Open(player))
+            return;
+
+        Time.timeScale = 0f;
+        shopMenu.SetActive(false);
+        weaponSelectMenu.SetActive(true);
     }
 }

@@ -17,8 +17,8 @@ public class ShopItem : ScriptableObject
     public ItemType type;
 
     [Header("Weapon modifiers")]
-    public float weaponDamageBonus;
-    public float weaponRangeBonus;
+    public float weaponDamage;
+    public float weaponRange;
 
     [Header("Power-up")]
     public PowerUpType powerUpType;

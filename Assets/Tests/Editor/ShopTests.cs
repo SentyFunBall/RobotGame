@@ -194,6 +194,83 @@ public class ShopTests
     }
 
     [Test]
+    public void WeaponSelectionShowsInventoryAndEquipsClickedWeapon()
+    {
+        Object first = AddItem("Weapon", 1);
+        Object second = AddItem("Weapon", 1);
+        AddItem("PowerUp", 1);
+        weapons.GetType().GetMethod("AddWeapon").Invoke(weapons, new[] { first });
+        weapons.GetType().GetMethod("AddWeapon").Invoke(weapons, new[] { second });
+
+        GameObject menu = new GameObject("Weapon selection", typeof(RectTransform));
+        try
+        {
+            Type equipperType = Type.GetType("WeaponEquipper, Assembly-CSharp", true);
+            Component equipper = menu.AddComponent(equipperType);
+            equipperType.GetField("textTemplate", PrivateInstance).SetValue(
+                equipper, shopType.GetField("textTemplate", PrivateInstance).GetValue(shop)
+            );
+            Assert.That(equipperType.GetMethod("Open").Invoke(equipper, new object[] { player }), Is.True);
+
+            Array buttons = (Array)equipperType.GetField("buttons", PrivateInstance).GetValue(equipper);
+            Array labels = (Array)equipperType.GetField("labels", PrivateInstance).GetValue(equipper);
+            Type buttonType = buttons.GetValue(0).GetType();
+            Assert.That(buttonType.GetProperty("interactable").GetValue(buttons.GetValue(2)), Is.False);
+            Assert.That(labels.GetValue(1).GetType().GetProperty("text").GetValue(labels.GetValue(1)), Does.Contain("Equipped"));
+
+            ((UnityEvent)buttonType.GetProperty("onClick").GetValue(buttons.GetValue(0))).Invoke();
+            Assert.That(weapons.GetType().GetProperty("EquippedWeapon").GetValue(weapons), Is.EqualTo(first));
+            Assert.That(labels.GetValue(0).GetType().GetProperty("text").GetValue(labels.GetValue(0)), Does.Contain("Equipped"));
+            Assert.That(buttonType.GetProperty("interactable").GetValue(buttons.GetValue(1)), Is.True);
+
+            Assert.That(equipperType.GetMethod("Open").Invoke(equipper, new object[] { player }), Is.True);
+            Assert.That(menu.transform.Find("Weapon slot 1"), Is.Not.Null);
+            Assert.That(menu.transform.childCount, Is.EqualTo(6));
+        }
+        finally
+        {
+            Object.DestroyImmediate(menu);
+        }
+    }
+
+    [Test]
+    public void WeaponSelectionHandlesEmptyInventoryAndAdditionalPages()
+    {
+        GameObject menu = new GameObject("Weapon selection", typeof(RectTransform));
+        try
+        {
+            Type equipperType = Type.GetType("WeaponEquipper, Assembly-CSharp", true);
+            Component equipper = menu.AddComponent(equipperType);
+            equipperType.GetField("textTemplate", PrivateInstance).SetValue(
+                equipper, shopType.GetField("textTemplate", PrivateInstance).GetValue(shop)
+            );
+            equipperType.GetMethod("Open").Invoke(equipper, new object[] { player });
+            Component pageText = (Component)equipperType.GetField("pageText", PrivateInstance).GetValue(equipper);
+            Assert.That(pageText.GetType().GetProperty("text").GetValue(pageText), Is.EqualTo("No weapons unlocked"));
+
+            Object last = null;
+            for (int i = 0; i < 4; i++)
+            {
+                last = AddItem("Weapon", 1);
+                weapons.GetType().GetMethod("AddWeapon").Invoke(weapons, new[] { last });
+            }
+            weapons.GetType().GetMethod("EquipWeapon").Invoke(weapons, new[] { items[0] });
+            equipperType.GetMethod("Open").Invoke(equipper, new object[] { player });
+            Component next = (Component)equipperType.GetField("nextButton", PrivateInstance).GetValue(equipper);
+            ((UnityEvent)next.GetType().GetProperty("onClick").GetValue(next)).Invoke();
+            Assert.That(pageText.GetType().GetProperty("text").GetValue(pageText), Is.EqualTo("Weapons 2/2"));
+            Array buttons = (Array)equipperType.GetField("buttons", PrivateInstance).GetValue(equipper);
+            object firstButton = buttons.GetValue(0);
+            ((UnityEvent)firstButton.GetType().GetProperty("onClick").GetValue(firstButton)).Invoke();
+            Assert.That(weapons.GetType().GetProperty("EquippedWeapon").GetValue(weapons), Is.EqualTo(last));
+        }
+        finally
+        {
+            Object.DestroyImmediate(menu);
+        }
+    }
+
+    [Test]
     public void SceneShopAndPlayerPrefabAreWired()
     {
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Meshes/Player/Player.prefab");
@@ -211,16 +288,24 @@ public class ShopTests
             }
             Assert.That(sceneShop, Is.Not.Null);
             Assert.That(shopType.GetField("textTemplate", PrivateInstance).GetValue(sceneShop), Is.Not.Null);
-            Assert.That(((IList)shopType.GetField("possibleItems", PrivateInstance).GetValue(sceneShop)).Count, Is.Zero);
-
             Transform continueButton = sceneShop.transform.Find("ContinueBtn");
             Type buttonType = Type.GetType("UnityEngine.UI.Button, UnityEngine.UI", true);
             Component button = continueButton.GetComponent(buttonType);
             var onClick = (UnityEventBase)buttonType.GetProperty("onClick").GetValue(button);
-            Assert.That(onClick.GetPersistentMethodName(0), Is.EqualTo("AdvanceLevel"));
+            Assert.That(onClick.GetPersistentMethodName(0), Is.EqualTo("ShowWeaponSelectMenu"));
             Object target = onClick.GetPersistentTarget(0);
             Assert.That(target, Is.Not.Null);
-            Assert.That(target.GetType().GetMethod("AdvanceLevel").IsStatic, Is.False);
+            Component menus = (Component)target;
+            GameObject selection = (GameObject)menus.GetType().GetField("weaponSelectMenu", PrivateInstance).GetValue(menus);
+            Assert.That(selection, Is.Not.Null);
+            Type equipperType = Type.GetType("WeaponEquipper, Assembly-CSharp", true);
+            Component equipper = selection.GetComponent(equipperType);
+            Assert.That(equipper, Is.Not.Null);
+            Assert.That(equipperType.GetField("textTemplate", PrivateInstance).GetValue(equipper), Is.Not.Null);
+            Component selectionContinue = selection.transform.Find("ContinueBtn").GetComponent(buttonType);
+            var selectionClick = (UnityEventBase)buttonType.GetProperty("onClick").GetValue(selectionContinue);
+            Assert.That(selectionClick.GetPersistentMethodName(0), Is.EqualTo("AdvanceLevel"));
+            Assert.That(selectionClick.GetPersistentTarget(0).GetType().GetMethod("AdvanceLevel").IsStatic, Is.False);
         }
         finally
         {

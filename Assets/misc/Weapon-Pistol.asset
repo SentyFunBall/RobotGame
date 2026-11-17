@@ -17,6 +17,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 359f21f2a3c98314f984bd21033884f9, type: 3}
   price: 2
   type: 0
-  weaponDamageBonus: 5
-  weaponRangeBonus: 10
+  weaponDamage: 15
+  weaponRange: 7
   powerUpType: 0
