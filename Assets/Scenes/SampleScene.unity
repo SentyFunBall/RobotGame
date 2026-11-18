@@ -3368,6 +3368,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 417cdde7c9068734795044c59921f6b3, type: 2}
   - {fileID: 11400000, guid: 8531fe0e76ca1aa4ca20ce0c123bf03d, type: 2}
   - {fileID: 11400000, guid: 0cdc67ad07d96af4982ba2e9a84b2788, type: 2}
+  - {fileID: 11400000, guid: d58921999ca2cb44986059420e901d64, type: 2}
+  - {fileID: 11400000, guid: 3cdded1418653c646846a48d97a87c27, type: 2}
+  - {fileID: 11400000, guid: 0ad5fa7fb075a3e4488d8d016099fa32, type: 2}
   textTemplate: {fileID: 1226919507}
 --- !u!1 &995846511
 GameObject:
@@ -7270,6 +7273,10 @@ PrefabInstance:
       propertyPath: gameMenusController
       value: 
       objectReference: {fileID: 753814396}
+    - target: {fileID: 8763144059891742299, guid: 406032daad4fb764abfea37c9abd59cd, type: 3}
+      propertyPath: debugItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 0cdc67ad07d96af4982ba2e9a84b2788, type: 2}
     - target: {fileID: 8763144059891742299, guid: 406032daad4fb764abfea37c9abd59cd, type: 3}
       propertyPath: sprintBar
       value: 

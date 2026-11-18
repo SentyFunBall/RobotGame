@@ -58,8 +58,15 @@ public class PlayerHealth : MonoBehaviour
         {
             healthTextObject.GetComponent<TextMeshProUGUI>().text = prefix + health.ToString("F0");
         }
-        var cooldown = GetComponent<PlayerController>().attackCooldown;
-        var nextAttackTime = GetComponent<PlayerController>().nextAttackTime;
+        
+        PlayerController playerController = GetComponent<PlayerController>();
+        WeaponManager weaponManager = GetComponent<WeaponManager>();
+        
+        float cooldown = playerController.attackCooldown;
+        if (weaponManager != null && weaponManager.EquippedWeapon != null)
+            cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+        
+        var nextAttackTime = playerController.nextAttackTime;
         if (cooldownBar != null)
         {
             cooldownBar.value = 1 - ((nextAttackTime - Time.time) / cooldown);

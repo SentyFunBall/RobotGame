@@ -215,7 +215,11 @@ public class ShopTests
             Array buttons = (Array)equipperType.GetField("buttons", PrivateInstance).GetValue(equipper);
             Array labels = (Array)equipperType.GetField("labels", PrivateInstance).GetValue(equipper);
             Type buttonType = buttons.GetValue(0).GetType();
-            Assert.That(buttonType.GetProperty("interactable").GetValue(buttons.GetValue(2)), Is.False);
+            Assert.That(((Component)buttons.GetValue(0)).gameObject.activeSelf, Is.True);
+            Assert.That(((Component)buttons.GetValue(1)).gameObject.activeSelf, Is.True);
+            Assert.That(((Component)buttons.GetValue(2)).gameObject.activeSelf, Is.False);
+            Assert.That(((RectTransform)((Component)buttons.GetValue(0)).transform).anchoredPosition.x, Is.EqualTo(-135f));
+            Assert.That(((RectTransform)((Component)buttons.GetValue(1)).transform).anchoredPosition.x, Is.EqualTo(135f));
             Assert.That(labels.GetValue(1).GetType().GetProperty("text").GetValue(labels.GetValue(1)), Does.Contain("Equipped"));
 
             ((UnityEvent)buttonType.GetProperty("onClick").GetValue(buttons.GetValue(0))).Invoke();
@@ -247,6 +251,9 @@ public class ShopTests
             equipperType.GetMethod("Open").Invoke(equipper, new object[] { player });
             Component pageText = (Component)equipperType.GetField("pageText", PrivateInstance).GetValue(equipper);
             Assert.That(pageText.GetType().GetProperty("text").GetValue(pageText), Is.EqualTo("No weapons unlocked"));
+            Array buttons = (Array)equipperType.GetField("buttons", PrivateInstance).GetValue(equipper);
+            foreach (Component button in buttons)
+                Assert.That(button.gameObject.activeSelf, Is.False);
 
             Object last = null;
             for (int i = 0; i < 4; i++)
@@ -256,13 +263,22 @@ public class ShopTests
             }
             weapons.GetType().GetMethod("EquipWeapon").Invoke(weapons, new[] { items[0] });
             equipperType.GetMethod("Open").Invoke(equipper, new object[] { player });
+            foreach (Component button in buttons)
+                Assert.That(button.gameObject.activeSelf, Is.True);
             Component next = (Component)equipperType.GetField("nextButton", PrivateInstance).GetValue(equipper);
             ((UnityEvent)next.GetType().GetProperty("onClick").GetValue(next)).Invoke();
             Assert.That(pageText.GetType().GetProperty("text").GetValue(pageText), Is.EqualTo("Weapons 2/2"));
-            Array buttons = (Array)equipperType.GetField("buttons", PrivateInstance).GetValue(equipper);
+            Assert.That(((Component)buttons.GetValue(0)).gameObject.activeSelf, Is.True);
+            Assert.That(((RectTransform)((Component)buttons.GetValue(0)).transform).anchoredPosition.x, Is.Zero);
+            Assert.That(((Component)buttons.GetValue(1)).gameObject.activeSelf, Is.False);
+            Assert.That(((Component)buttons.GetValue(2)).gameObject.activeSelf, Is.False);
             object firstButton = buttons.GetValue(0);
             ((UnityEvent)firstButton.GetType().GetProperty("onClick").GetValue(firstButton)).Invoke();
             Assert.That(weapons.GetType().GetProperty("EquippedWeapon").GetValue(weapons), Is.EqualTo(last));
+            Component previous = (Component)equipperType.GetField("previousButton", PrivateInstance).GetValue(equipper);
+            ((UnityEvent)previous.GetType().GetProperty("onClick").GetValue(previous)).Invoke();
+            foreach (Component button in buttons)
+                Assert.That(button.gameObject.activeSelf, Is.True);
         }
         finally
         {

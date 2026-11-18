@@ -150,7 +150,7 @@ public class Shop : MonoBehaviour
                 string status =
                     sold[i] ? "Sold"
                     : IsOwned(item) ? "Owned"
-                    : $"{item.price} loot";
+                    : $"{item.price * DungeonGenerator.Instance.Difficulty.shopItemCostMult} loot";
                 labels[i].text = $"{item.itemName}\n{item.description}\n{status}";
                 buttons[i].interactable =
                     !sold[i]

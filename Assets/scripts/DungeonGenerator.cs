@@ -26,6 +26,7 @@ public class DungeonDifficulty
 
     [Range(0, 10)]
     public int shopItemCostMult;
+    public int level;
 }
 
 public struct OpenConnection
@@ -117,6 +118,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.RoomCount = 15;
                 Difficulty.numberOfEnemies = 5;
                 Difficulty.shopItemCostMult = 1;
+                Difficulty.level = 1;
                 break;
 
             case "Hard":
@@ -127,6 +129,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.RoomCount = 50;
                 Difficulty.numberOfEnemies = 20;
                 Difficulty.shopItemCostMult = 5;
+                Difficulty.level = 3;
                 break;
 
             case "Medium":
@@ -138,6 +141,7 @@ public class DungeonGenerator : MonoBehaviour
                 Difficulty.RoomCount = 50;
                 Difficulty.numberOfEnemies = 25;
                 Difficulty.shopItemCostMult = 2;
+                Difficulty.level = 2;
                 break;
         }
     }
@@ -793,6 +797,7 @@ public class DungeonGenerator : MonoBehaviour
 
     private void GenerateDungeonInternal(bool spawnEnemiesAndLoot, bool useBossEnd)
     {
+        UnityEngine.Debug.Log("Starting dungeon generation. Difficulty: " + Difficulty.level);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 

@@ -6,6 +6,14 @@ public enum ItemType
     PowerUp,
 }
 
+public enum WeaponType
+{
+    Ranged,
+    EMP,
+    Bazooka,
+    Rail,
+}
+
 [CreateAssetMenu(fileName = "ShopItem")]
 public class ShopItem : ScriptableObject
 {
@@ -19,6 +27,9 @@ public class ShopItem : ScriptableObject
     [Header("Weapon modifiers")]
     public float weaponDamage;
     public float weaponRange;
+    public float weaponCooldown;
+    public WeaponType weaponType;
+    public GameObject bulletPrefab;
 
     [Header("Power-up")]
     public PowerUpType powerUpType;

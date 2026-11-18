@@ -58,6 +58,7 @@ public class PlayerController : MonoBehaviour
     private bool grounded;
 
     private bool doAttack;
+    private bool doMeleeAttack;
 
     [SerializeField]
     private float attackRange = 2f;
@@ -74,7 +75,7 @@ public class PlayerController : MonoBehaviour
     public float nextAttackTime;
 
     [SerializeField]
-    private GameObject bulletPrefab;
+    private ShopItem debugItem;
 
     void Awake()
     {
@@ -228,6 +229,12 @@ public class PlayerController : MonoBehaviour
         if (controls.Player.Attack.triggered)
             doAttack = true;
 
+        if (
+            (controls.Player.Attack.triggered && !GetComponent<WeaponManager>().HasAnyWeapon())
+            || controls.Player.SecondaryAttack.triggered
+        )
+            doMeleeAttack = true;
+
 #if UNITY_EDITOR
         bool t = controls.Player.DEBUGAddPowerUp.triggered;
         if (t)
@@ -236,6 +243,12 @@ public class PlayerController : MonoBehaviour
             sprintTimeRemaining = sprintTime;
             sprintCooldownRemaining = 0f;
             sprintCooldownActive = false;
+
+            if (debugItem != null)
+            {
+                GetComponent<WeaponManager>().AddWeapon(debugItem);
+                GetComponent<WeaponManager>().EquipWeapon(debugItem);
+            }
         }
 #endif
     }
@@ -312,7 +325,6 @@ public class PlayerController : MonoBehaviour
             if (isSprint && isSpeedPowerUpActive)
             {
                 characterAnimation.Sprint(speed);
-                Debug.Log("Sprint: " + speed);
             }
             else
             {
@@ -322,28 +334,39 @@ public class PlayerController : MonoBehaviour
         }
 
         // Attack
-        if (doAttack)
+        if (doAttack || doMeleeAttack)
         {
-            doAttack = false;
             if (Time.time < nextAttackTime)
                 return;
-            nextAttackTime = Time.time + attackCooldown;
 
-            DoRegularAttack();
+            float cooldown = attackCooldown;
+            if (weaponManager.EquippedWeapon != null)
+                cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+
+            nextAttackTime = Time.time + cooldown;
+
+            if (doMeleeAttack || weaponManager.EquippedWeapon == null)
+                DoMeleeAttack();
+            else
+                DoWeaponAttack();
+
+            doAttack = false;
+            doMeleeAttack = false;
         }
     }
 
-    private bool TryDamageTarget(Collider targetCollider)
+    private bool TryDamageTarget(Collider targetCollider, bool melee)
     {
-        float damage = Mathf.Max(
-            0f,
-            attackDamage
-                + (
-                    weaponManager.EquippedWeapon != null
-                        ? weaponManager.EquippedWeapon.weaponDamage
-                        : 0f
-                )
-        );
+        float damage = attackDamage;
+        if (!melee)
+        {
+            damage = Mathf.Max(
+                0f,
+                weaponManager.EquippedWeapon != null
+                    ? weaponManager.EquippedWeapon.weaponDamage
+                    : 0f
+            );
+        }
         EnemyAI enemy = targetCollider.GetComponentInParent<EnemyAI>();
         if (enemy != null)
         {
@@ -379,7 +402,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void DoRegularAttack()
+    private void DoMeleeAttack()
     {
         Transform playerChild = transform.GetChild(0);
         Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
@@ -399,7 +422,7 @@ public class PlayerController : MonoBehaviour
             if (targetOffset.sqrMagnitude < Mathf.Epsilon)
                 targetOffset = closeTarget.bounds.center - origin;
             targetOffset.y = 0f;
-            if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget))
+            if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget, true))
             {
                 hitTarget = true;
                 break;
@@ -413,33 +436,176 @@ public class PlayerController : MonoBehaviour
                 attackRadius,
                 attackDir,
                 out RaycastHit hitInfo,
-                Mathf.Max(
-                    0f,
-                    attackRange
-                        + (
-                            weaponManager.EquippedWeapon != null
-                                ? weaponManager.EquippedWeapon.weaponRange
-                                : 0f
-                        )
-                ),
+                attackRange,
                 enemyMask,
                 QueryTriggerInteraction.Ignore
             )
         )
         {
-            TryDamageTarget(hitInfo.collider);
+            TryDamageTarget(hitInfo.collider, false);
         }
-        if (!GetComponent<WeaponManager>().HasAnyWeapon())
-            characterAnimation.Attack();
-        else
+        characterAnimation.Attack();
+    }
+
+    private void DoWeaponAttack()
+    {
+        ShopItem weapon = weaponManager.EquippedWeapon;
+        if (weapon == null)
+            return;
+
+        switch (weapon.weaponType)
         {
-            GameObject bullet = Instantiate(
-                bulletPrefab,
-                transform.position + transform.forward,
-                Quaternion.identity
-            );
-            bullet.GetComponent<Rigidbody>().linearVelocity = transform.forward * 10f;
-            despawnBulletAfterDelay(bullet, 3f);
+            case WeaponType.Ranged:
+                DoRangedAttack(weapon);
+                break;
+            case WeaponType.EMP:
+                DoEMPAttack(weapon);
+                break;
+            case WeaponType.Bazooka:
+                DoBazookaAttack(weapon);
+                break;
+            case WeaponType.Rail:
+                DoRailAttack(weapon);
+                break;
+        }
+    }
+
+    private void DoRangedAttack(ShopItem weapon)
+    {
+        GameObject bulletPrefabToUse = weapon.bulletPrefab;
+        Vector3 forward = transform.GetChild(0).forward;
+        if (bulletPrefabToUse == null)
+            return;
+
+        GameObject bullet = Instantiate(
+            bulletPrefabToUse,
+            transform.position + forward,
+            Quaternion.identity
+        );
+        bullet.GetComponent<Rigidbody>().linearVelocity = forward * 20f;
+        bullet.transform.forward = forward;
+        Bullet bulletComponent = bullet.GetComponent<Bullet>();
+        if (bulletComponent != null)
+            bulletComponent.parentWeapon = weapon;
+        despawnBulletAfterDelay(bullet, weapon.weaponRange / 10f);
+    }
+
+    private void DoEMPAttack(ShopItem weapon)
+    {
+        Transform playerChild = transform.GetChild(0);
+        Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+        Vector3 origin = playerCollider.bounds.center;
+        const float attackRadius = 1.0f;
+
+        float range = Mathf.Max(attackRange, weapon.weaponRange);
+
+        bool hitTarget = false;
+        Collider[] closeTargets = Physics.OverlapSphere(
+            origin,
+            attackRadius,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+
+        foreach (Collider closeTarget in closeTargets)
+        {
+            Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
+            if (targetOffset.sqrMagnitude < Mathf.Epsilon)
+                targetOffset = closeTarget.bounds.center - origin;
+            targetOffset.y = 0f;
+            if (Vector3.Dot(attackDir, targetOffset) >= 0f)
+            {
+                ApplyEMPFreeze(closeTarget, weapon.weaponDamage);
+                hitTarget = true;
+                break;
+            }
+        }
+
+        if (!hitTarget)
+        {
+            if (
+                Physics.SphereCast(
+                    origin,
+                    attackRadius,
+                    attackDir,
+                    out RaycastHit hitInfo,
+                    range,
+                    enemyMask,
+                    QueryTriggerInteraction.Ignore
+                )
+            )
+            {
+                ApplyEMPFreeze(hitInfo.collider, weapon.weaponDamage);
+            }
+        }
+    }
+
+    private void ApplyEMPFreeze(Collider targetCollider, float duration)
+    {
+        EnemyAI enemy = targetCollider.GetComponentInParent<EnemyAI>();
+        if (enemy != null)
+        {
+            enemy.Freeze(duration);
+            if (attackAudio != null)
+                attackAudio.Play();
+        }
+    }
+
+    private void DoBazookaAttack(ShopItem weapon)
+    {
+        GameObject bulletPrefabToUse = weapon.bulletPrefab;
+        if (bulletPrefabToUse == null)
+            return;
+
+        GameObject rocket = Instantiate(
+            bulletPrefabToUse,
+            transform.position + transform.forward,
+            Quaternion.identity
+        );
+        Rigidbody rb = rocket.GetComponent<Rigidbody>();
+        if (rb != null)
+            rb.linearVelocity = transform.forward * 15f;
+
+        despawnBulletAfterDelay(rocket, 10f);
+    }
+
+    private void DoRailAttack(ShopItem weapon)
+    {
+        Transform playerChild = transform.GetChild(0);
+        Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+        Vector3 origin = playerCollider.bounds.center;
+
+        float range = Mathf.Max(attackRange, weapon.weaponRange);
+
+        RaycastHit[] hits = Physics.RaycastAll(
+            origin,
+            attackDir,
+            range,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+
+        float damage = Mathf.Max(0f, attackDamage + weapon.weaponDamage);
+
+        foreach (RaycastHit hit in hits)
+        {
+            EnemyAI enemy = hit.collider.GetComponentInParent<EnemyAI>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(damage);
+                if (attackAudio != null)
+                    attackAudio.Play();
+                break;
+            }
+
+            RobotBossAI boss = hit.collider.GetComponentInParent<RobotBossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(damage);
+                if (attackAudio != null)
+                    attackAudio.Play();
+                break;
+            }
         }
     }
 

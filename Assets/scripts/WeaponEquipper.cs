@@ -108,16 +108,23 @@ public class WeaponEquipper : MonoBehaviour
         nextButton.gameObject.SetActive(pageCount > 1);
         previousButton.interactable = page > 0;
         nextButton.interactable = page + 1 < pageCount;
+        int visibleCount = Mathf.Min(buttons.Length, count - page * buttons.Length);
         for (int i = 0; i < buttons.Length; i++)
         {
             int index = page * buttons.Length + i;
-            ShopItem item = index < count ? weapons.Weapons[index] : null;
-            icons[i].sprite = item != null ? item.icon : null;
-            icons[i].enabled = item != null && item.icon != null;
-            labels[i].text = item == null
-                ? "Empty"
-                : $"{item.itemName}\n{item.description}\n{(item == weapons.EquippedWeapon ? "Equipped" : "Equip")}";
-            buttons[i].interactable = item != null && item != weapons.EquippedWeapon;
+            bool visible = i < visibleCount;
+            buttons[i].gameObject.SetActive(visible);
+            if (!visible)
+                continue;
+
+            ((RectTransform)buttons[i].transform).anchoredPosition =
+                new Vector2((i - (visibleCount - 1) / 2f) * 270f, -20f);
+            ShopItem item = weapons.Weapons[index];
+            icons[i].sprite = item.icon;
+            icons[i].enabled = item.icon != null;
+            labels[i].text =
+                $"{item.itemName}\n{item.description}\n{(item == weapons.EquippedWeapon ? "Equipped" : "Equip")}";
+            buttons[i].interactable = item != weapons.EquippedWeapon;
         }
     }
 }

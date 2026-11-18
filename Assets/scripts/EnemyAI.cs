@@ -109,6 +109,8 @@ public class EnemyAI : MonoBehaviour
 
     private CharacterAnimation characterAnimation;
 
+    private float freezeEndTime = 0f;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -158,6 +160,13 @@ public class EnemyAI : MonoBehaviour
             return;
         if (player == null)
         {
+            return;
+        }
+
+        bool isFrozen = Time.time < freezeEndTime;
+        if (isFrozen)
+        {
+            agent.isStopped = true;
             return;
         }
 
@@ -366,6 +375,11 @@ public class EnemyAI : MonoBehaviour
             Die();
         }
         Flash();
+    }
+
+    public void Freeze(float duration)
+    {
+        freezeEndTime = Time.time + duration;
     }
 
     private void Die()

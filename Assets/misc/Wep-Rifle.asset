@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ac3d978346adc741ad46bff8bd58671, type: 3}
+  m_Name: Wep-Rifle
+  m_EditorClassIdentifier: Assembly-CSharp::ShopItem
+  itemName: Rail Driver
+  description: Fires high energy pellets - Lot of damage, long recharge time
+  icon: {fileID: 21300000, guid: 647e67dcb6e5d5044a999530d3128f16, type: 3}
+  price: 5
+  type: 0
+  weaponDamage: 40
+  weaponRange: 30
+  weaponCooldown: 5
+  weaponType: 3
+  bulletPrefab: {fileID: 0}
+  powerUpType: 0
