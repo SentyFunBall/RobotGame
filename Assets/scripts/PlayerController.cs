@@ -473,7 +473,7 @@ public class PlayerController : MonoBehaviour
             )
         )
         {
-            TryDamageTarget(hitInfo.collider, false);
+            TryDamageTarget(hitInfo.collider, true);
         }
         characterAnimation.Attack();
     }
@@ -513,8 +513,8 @@ public class PlayerController : MonoBehaviour
             transform.position + forward,
             Quaternion.identity
         );
-        bullet.GetComponent<Rigidbody>().linearVelocity = forward * 20f;
         bullet.transform.forward = forward;
+        bullet.GetComponent<Rigidbody>().linearVelocity = forward * 20f;
         Bullet bulletComponent = bullet.GetComponent<Bullet>();
         if (bulletComponent != null)
             bulletComponent.parentWeapon = weapon;
@@ -533,11 +533,12 @@ public class PlayerController : MonoBehaviour
         bool hitTarget = false;
         Collider[] closeTargets = Physics.OverlapSphere(
             origin,
-            attackRadius,
+            range,
             enemyMask,
             QueryTriggerInteraction.Ignore
         );
 
+        UnityEngine.Debug.Log("Close targets found: " + closeTargets.Length);
         foreach (Collider closeTarget in closeTargets)
         {
             Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
@@ -548,7 +549,6 @@ public class PlayerController : MonoBehaviour
             {
                 ApplyEMPFreeze(closeTarget, weapon.weaponDamage);
                 hitTarget = true;
-                break;
             }
         }
 
@@ -588,16 +588,17 @@ public class PlayerController : MonoBehaviour
         if (bulletPrefabToUse == null)
             return;
 
+        Vector3 forward = transform.GetChild(0).forward;
         GameObject rocket = Instantiate(
             bulletPrefabToUse,
-            transform.position + (1.0f * transform.forward),
+            transform.position + (1.0f * forward),
             Quaternion.identity
         );
         Rigidbody rb = rocket.GetComponent<Rigidbody>();
+        rocket.transform.forward = forward;
         if (rb != null)
-            rb.linearVelocity = transform.forward * 25f;
+            rb.linearVelocity = forward * 25f;
 
-        rocket.transform.forward = transform.forward;
         Rocket bulletComponent = rocket.GetComponent<Rocket>();
         if (bulletComponent != null)
             bulletComponent.parentWeapon = weapon;
@@ -610,6 +611,13 @@ public class PlayerController : MonoBehaviour
         Transform playerChild = transform.GetChild(0);
         Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
         Vector3 origin = playerCollider.bounds.center;
+
+        GameObject railEffect = Instantiate(
+            weapon.bulletPrefab,
+            origin,
+            Quaternion.LookRotation(attackDir)
+        );
+        StartCoroutine(RailBulletCoroutine(railEffect, 2f));
 
         float range = Mathf.Max(attackRange, weapon.weaponRange);
 
@@ -631,7 +639,6 @@ public class PlayerController : MonoBehaviour
                 enemy.TakeDamage(damage);
                 if (attackAudio != null)
                     attackAudio.Play();
-                break;
             }
 
             RobotBossAI boss = hit.collider.GetComponentInParent<RobotBossAI>();
@@ -648,5 +655,22 @@ public class PlayerController : MonoBehaviour
     private void despawnBulletAfterDelay(GameObject bullet, float delay)
     {
         Destroy(bullet, delay);
+    }
+
+    private System.Collections.IEnumerator RailBulletCoroutine(GameObject railEffect, float delay)
+    {
+        // Move the rail effect forward over time (optional, depending on your effect)
+        float elapsedTime = 0f;
+        while (elapsedTime < delay)
+        {
+            if (railEffect != null)
+                railEffect.transform.position +=
+                    railEffect.transform.forward * Time.deltaTime * 25f;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        if (railEffect != null)
+            Destroy(railEffect);
     }
 }

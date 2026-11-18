@@ -804,7 +804,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: bed25ab03c155864095f7070025a938f, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1732,7 +1732,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 73c2fc7c215d5fc4995ea882a216f400, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -2687,7 +2687,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 6bf3d48f19455e6408e5c37502371df4, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -3575,7 +3575,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 359f21f2a3c98314f984bd21033884f9, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -3814,7 +3814,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 2b7eed381ab601c45828736e187cee7b, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -5408,7 +5408,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 083471d6ba018384c9524121bb630c97, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -6636,7 +6636,7 @@ GameObject:
   - component: {fileID: 1991469790}
   - component: {fileID: 1991469789}
   m_Layer: 0
-  m_Name: Image
+  m_Name: bg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7276,6 +7276,10 @@ PrefabInstance:
       propertyPath: gameMenusController
       value: 
       objectReference: {fileID: 753814396}
+    - target: {fileID: 8763144059891742299, guid: 406032daad4fb764abfea37c9abd59cd, type: 3}
+      propertyPath: debugItem
+      value: 
+      objectReference: {fileID: 11400000, guid: d58921999ca2cb44986059420e901d64, type: 2}
     - target: {fileID: 8763144059891742299, guid: 406032daad4fb764abfea37c9abd59cd, type: 3}
       propertyPath: sprintBar
       value: 

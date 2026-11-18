@@ -365,6 +365,7 @@ public class EnemyAI : MonoBehaviour
     public void TakeDamage(float damage)
     {
         health -= damage;
+        Flash();
         if (GetComponent<AudioSource>() != null)
         {
             hitAudio.Play();
@@ -374,7 +375,6 @@ public class EnemyAI : MonoBehaviour
             dying = true;
             Die();
         }
-        Flash();
     }
 
     public void Freeze(float duration)

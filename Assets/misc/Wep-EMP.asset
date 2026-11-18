@@ -17,8 +17,8 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 3b07942e5ae6a5348be889e1603ba442, type: 3}
   price: 4
   type: 0
-  weaponDamage: 3
-  weaponRange: 5
+  weaponDamage: 6
+  weaponRange: 6
   weaponCooldown: 8
   weaponType: 1
   bulletPrefab: {fileID: 0}
