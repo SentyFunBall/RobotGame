@@ -73,6 +73,11 @@ public class PlayerController : MonoBehaviour
     public float attackCooldown = 2.0f;
 
     public float nextAttackTime;
+    private float nextMeleeAttackTime;
+    private float nextWeaponAttackTime;
+
+    public float NextMeleeAttackTime => nextMeleeAttackTime;
+    public float NextWeaponAttackTime => nextWeaponAttackTime;
 
     [SerializeField]
     private ShopItem debugItem;
@@ -336,22 +341,48 @@ public class PlayerController : MonoBehaviour
         // Attack
         if (doAttack || doMeleeAttack)
         {
-            if (Time.time < nextAttackTime)
-                return;
-
-            float cooldown = attackCooldown;
-            if (weaponManager.EquippedWeapon != null)
-                cooldown = weaponManager.EquippedWeapon.weaponCooldown;
-
-            nextAttackTime = Time.time + cooldown;
-
-            if (doMeleeAttack || weaponManager.EquippedWeapon == null)
-                DoMeleeAttack();
-            else
-                DoWeaponAttack();
-
+            // Clear input flags immediately to prevent buffering
+            bool tryMelee = doMeleeAttack;
+            bool tryWeapon = doAttack;
             doAttack = false;
             doMeleeAttack = false;
+
+            // Try melee attack first if requested
+            if (tryMelee)
+            {
+                if (Time.time >= nextMeleeAttackTime)
+                {
+                    nextMeleeAttackTime = Time.time + attackCooldown;
+                    DoMeleeAttack();
+                }
+                return;
+            }
+
+            // Try weapon attack if requested and no weapon equipped = use melee
+            if (tryWeapon || weaponManager.EquippedWeapon == null)
+            {
+                if (weaponManager.EquippedWeapon == null)
+                {
+                    // No weapon - do melee
+                    if (Time.time >= nextMeleeAttackTime)
+                    {
+                        nextMeleeAttackTime = Time.time + attackCooldown;
+                        DoMeleeAttack();
+                    }
+                }
+                else
+                {
+                    // Have weapon - do weapon attack
+                    if (Time.time >= nextWeaponAttackTime)
+                    {
+                        float cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+                        nextWeaponAttackTime = Time.time + cooldown;
+                        nextAttackTime = nextWeaponAttackTime; // For UI
+                        DoWeaponAttack();
+                    }
+                }
+                return;
+            }
         }
     }
 
@@ -559,12 +590,17 @@ public class PlayerController : MonoBehaviour
 
         GameObject rocket = Instantiate(
             bulletPrefabToUse,
-            transform.position + transform.forward,
+            transform.position + (1.0f * transform.forward),
             Quaternion.identity
         );
         Rigidbody rb = rocket.GetComponent<Rigidbody>();
         if (rb != null)
-            rb.linearVelocity = transform.forward * 15f;
+            rb.linearVelocity = transform.forward * 25f;
+
+        rocket.transform.forward = transform.forward;
+        Rocket bulletComponent = rocket.GetComponent<Rocket>();
+        if (bulletComponent != null)
+            bulletComponent.parentWeapon = weapon;
 
         despawnBulletAfterDelay(rocket, 10f);
     }

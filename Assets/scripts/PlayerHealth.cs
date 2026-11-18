@@ -62,14 +62,19 @@ public class PlayerHealth : MonoBehaviour
         PlayerController playerController = GetComponent<PlayerController>();
         WeaponManager weaponManager = GetComponent<WeaponManager>();
         
+        // Show weapon cooldown only when weapon is equipped, otherwise show melee cooldown
         float cooldown = playerController.attackCooldown;
-        if (weaponManager != null && weaponManager.EquippedWeapon != null)
-            cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+        float nextCooldownTime = playerController.NextMeleeAttackTime;
         
-        var nextAttackTime = playerController.nextAttackTime;
+        if (weaponManager != null && weaponManager.EquippedWeapon != null)
+        {
+            cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+            nextCooldownTime = playerController.NextWeaponAttackTime;
+        }
+        
         if (cooldownBar != null)
         {
-            cooldownBar.value = 1 - ((nextAttackTime - Time.time) / cooldown);
+            cooldownBar.value = 1 - ((nextCooldownTime - Time.time) / cooldown);
         }
     }
 

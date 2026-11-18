@@ -21,5 +21,5 @@ MonoBehaviour:
   weaponRange: 0
   weaponCooldown: 9
   weaponType: 2
-  bulletPrefab: {fileID: 5578728262812579440, guid: 9f7409487912a54488c34a0b1a67420e, type: 3}
+  bulletPrefab: {fileID: 5578728262812579440, guid: 1079924f3c84d014ebd8a33685acc508, type: 3}
   powerUpType: 0
