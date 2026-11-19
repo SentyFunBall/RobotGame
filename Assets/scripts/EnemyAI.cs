@@ -43,6 +43,11 @@ public class EnemyAI : MonoBehaviour
     private Coroutine damageFlashCoroutine;
 
     private static readonly int baseColor = Shader.PropertyToID("_BaseColor");
+    private static readonly Color defaultTintColor = new Color(
+        0xE9 / 255f,
+        0xDF / 255f,
+        0xA6 / 255f
+    );
 
     [Header("Combat")]
     [SerializeField]
@@ -85,6 +90,42 @@ public class EnemyAI : MonoBehaviour
     private Vector3 lockedDirection;
     private bool lungeHit;
     private bool previousUpdateRotation;
+
+    [Header("Heavy Slam")]
+    [SerializeField]
+    private float heavyWindupDelay = 1.25f;
+
+    [SerializeField]
+    private float heavyRecoveryDelay = 1f;
+
+    [SerializeField]
+    private float heavyAttackCooldown = 4.5f;
+
+    [SerializeField]
+    private float heavySlamRadius = 4f;
+
+    [SerializeField]
+    private float heavySlamForwardOffset = 1f;
+
+    [SerializeField]
+    private float heavyKnockbackForce = 8f;
+
+    [SerializeField]
+    private GameObject heavySlamVfxPrefab;
+
+    [SerializeField]
+    private Color heavyTelegraphColor = new Color(1f, 0.45f, 0f);
+
+    private enum HeavyState
+    {
+        None,
+        Windup,
+        Recovery,
+    }
+
+    private HeavyState heavyState = HeavyState.None;
+    private float heavyStateEndTime;
+    private float heavyWindupStartTime;
 
     private NavMeshAgent agent;
     private Transform player;
@@ -137,6 +178,13 @@ public class EnemyAI : MonoBehaviour
         if (meleeState != MeleeState.None)
         {
             UpdateMeleeAttack(distance);
+            UpdateAnimatorSpeed();
+            return;
+        }
+
+        if (heavyState != HeavyState.None)
+        {
+            UpdateHeavyAttack();
             UpdateAnimatorSpeed();
             return;
         }
@@ -248,6 +296,115 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    private void StartHeavyAttack()
+    {
+        Vector3 toPlayer = player.position - transform.position;
+        toPlayer.y = 0f;
+        lockedDirection = toPlayer.sqrMagnitude > 0.0001f ? toPlayer.normalized : transform.forward;
+        transform.rotation = Quaternion.LookRotation(lockedDirection, Vector3.up);
+
+        nextAttackTime = Time.time + heavyAttackCooldown;
+        characterAnimation.Attack();
+        agent.isStopped = true;
+        agent.ResetPath();
+        agent.velocity = Vector3.zero;
+        previousUpdateRotation = agent.updateRotation;
+        agent.updateRotation = false;
+        heavyState = HeavyState.Windup;
+        heavyWindupStartTime = Time.time;
+        heavyStateEndTime = Time.time + heavyWindupDelay;
+    }
+
+    private void UpdateHeavyAttack()
+    {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        transform.rotation = Quaternion.LookRotation(lockedDirection, Vector3.up);
+
+        if (heavyState == HeavyState.Windup)
+        {
+            if (damageFlashCoroutine == null)
+            {
+                float progress =
+                    heavyWindupDelay > 0f
+                        ? Mathf.Clamp01((Time.time - heavyWindupStartTime) / heavyWindupDelay)
+                        : 1f;
+                float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * Mathf.Lerp(6f, 18f, progress));
+                SetRenderersColor(Color.Lerp(defaultTintColor, heavyTelegraphColor, pulse));
+            }
+
+            if (Time.time >= heavyStateEndTime)
+            {
+                if (damageFlashCoroutine == null)
+                    SetRenderersColor(defaultTintColor);
+                ExecuteHeavySlam();
+                heavyState = HeavyState.Recovery;
+                heavyStateEndTime = Time.time + heavyRecoveryDelay;
+            }
+            return;
+        }
+
+        if (Time.time >= heavyStateEndTime)
+        {
+            heavyState = HeavyState.None;
+            agent.velocity = Vector3.zero;
+            agent.updateRotation = previousUpdateRotation;
+        }
+    }
+
+    private void ExecuteHeavySlam()
+    {
+        Vector3 impactPos = transform.position + lockedDirection * heavySlamForwardOffset;
+
+        if (heavySlamVfxPrefab != null)
+        {
+            Instantiate(heavySlamVfxPrefab, impactPos, Quaternion.identity);
+        }
+
+        Collider[] hits = Physics.OverlapSphere(impactPos, heavySlamRadius);
+        bool hitPlayer = false;
+        foreach (Collider hit in hits)
+        {
+            if (hitPlayer)
+                break;
+
+            PlayerHealth playerHealth = hit.GetComponentInParent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                hitPlayer = true;
+                playerHealth.TakeDamage(attackDamage);
+
+                if (heavyKnockbackForce > 0f)
+                {
+                    Rigidbody playerRb = playerHealth.GetComponent<Rigidbody>();
+                    if (playerRb != null)
+                    {
+                        Vector3 pushDir = playerHealth.transform.position - impactPos;
+                        pushDir.y = 0f;
+                        pushDir =
+                            pushDir.sqrMagnitude > 0.0001f ? pushDir.normalized : lockedDirection;
+                        playerRb.AddForce(pushDir * heavyKnockbackForce, ForceMode.Impulse);
+                    }
+                }
+            }
+        }
+    }
+
+    private void SetRenderersColor(Color color)
+    {
+        if (renderers == null || propBlock == null)
+            return;
+
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer == null)
+                continue;
+            renderer.GetPropertyBlock(propBlock);
+            propBlock.SetColor(baseColor, color);
+            renderer.SetPropertyBlock(propBlock);
+        }
+    }
+
     private bool IsTouchingPlayer()
     {
         if (enemyCollider != null && playerCollider != null)
@@ -277,6 +434,15 @@ public class EnemyAI : MonoBehaviour
             if (Time.time >= nextAttackTime)
             {
                 StartMeleeAttack();
+            }
+            return;
+        }
+
+        if (enemyType == EnemyType.Heavy)
+        {
+            if (Time.time >= nextAttackTime)
+            {
+                StartHeavyAttack();
             }
             return;
         }
@@ -311,6 +477,7 @@ public class EnemyAI : MonoBehaviour
 
     private void Die()
     {
+        heavyState = HeavyState.None;
         characterAnimation.SetDead(true);
         agent.enabled = false;
         if (enemyCollider != null)
@@ -357,6 +524,20 @@ public class EnemyAI : MonoBehaviour
             renderer.GetPropertyBlock(propBlock);
             propBlock.SetColor(baseColor, new Color(0xE9 / 255f, 0xDF / 255f, 0xA6 / 255f));
             renderer.SetPropertyBlock(propBlock);
+        }
+
+        damageFlashCoroutine = null;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (enemyType == EnemyType.Heavy)
+        {
+            Gizmos.color = new Color(1f, 0.45f, 0f, 0.85f);
+            Gizmos.DrawWireSphere(
+                transform.position + transform.forward * heavySlamForwardOffset,
+                heavySlamRadius
+            );
         }
     }
 }
