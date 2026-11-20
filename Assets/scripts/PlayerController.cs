@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterAnimation))]
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed = 6f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private InputSystem_Actions controls;

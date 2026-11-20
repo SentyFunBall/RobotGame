@@ -407,21 +407,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 12024080088310658, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
-      propertyPath: navMesh
+    - target: {fileID: 4367149986987647960, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+      propertyPath: enemyInfos.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4367149986987647960, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+      propertyPath: enemyInfos.Array.data[0].prefab
       value: 
-      objectReference: {fileID: 1955515127}
-    - target: {fileID: 12024080088310658, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
-      propertyPath: robotBossPrefab
-      value: 
-      objectReference: {fileID: 376409455819940113, guid: 20588da1cb0e4c548b94acbd2069b15d, type: 3}
-    - target: {fileID: 12024080088310658, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
-      propertyPath: navMeshLinkReach
+      objectReference: {fileID: 4710264686728733128, guid: 0948dd00a4bdf624793b8e70fd063ab7, type: 3}
+    - target: {fileID: 4367149986987647960, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+      propertyPath: enemyInfos.Array.data[0].weight
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 12024080088310658, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
-      propertyPath: navMeshLinkWidth
-      value: 10
+    - target: {fileID: 4367149986987647960, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+      propertyPath: enemyInfos.Array.data[1].prefab
+      value: 
+      objectReference: {fileID: 3348750150514989185, guid: 028c7db3d03a5824bbe88bb6471ae252, type: 3}
+    - target: {fileID: 4367149986987647960, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+      propertyPath: enemyInfos.Array.data[1].weight
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6462631502958609099, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
       propertyPath: m_Name
@@ -4973,52 +4977,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1918611950}
   m_CullTransparentMesh: 1
---- !u!1 &1955515127
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1955515130}
-  - component: {fileID: 1955515128}
-  m_Layer: 0
-  m_Name: NavMesh
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1955515128
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1955515127}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2e128454af5bfc41b1a9cf0e45f88e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  enemyPrefabs:
-  - {fileID: 4710264686728733128, guid: 0948dd00a4bdf624793b8e70fd063ab7, type: 3}
---- !u!4 &1955515130
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1955515127}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1968889715
 GameObject:
   m_ObjectHideFlags: 0
@@ -5473,7 +5431,6 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 753814395}
   - {fileID: 856493262}
-  - {fileID: 1955515130}
   - {fileID: 225993103}
   - {fileID: 2008701280}
   - {fileID: 958602635}

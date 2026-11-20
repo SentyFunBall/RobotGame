@@ -1,13 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using static SpawnUtility;
 
+[Serializable]
+public struct EnemySpawnInfo
+{
+    [SerializeField]
+    public GameObject prefab;
+    [SerializeField]
+    public float weight;
+}
+
 public class GenerateNavMesh : MonoBehaviour
 {
     [SerializeField]
-    private List<GameObject> enemyPrefabs = new();
+    private List<EnemySpawnInfo> enemyInfos = new();
     private List<GameObject> spawnedEnemies = new();
 
     private static GenerateNavMesh instance;
@@ -32,7 +42,7 @@ public class GenerateNavMesh : MonoBehaviour
     {
         yield return null;
     }
-
+    
     public IEnumerator SpawnEnemies()
     {
         yield return null;
@@ -52,13 +62,37 @@ public class GenerateNavMesh : MonoBehaviour
             )
             {
                 // TODO: Will need to restrict enemies to certain levels/rooms eventually
+                GameObject enemyPrefab = PickRandomEnemy();
+                if (enemyPrefab == null)
+                {
+                    UnityEngine.Debug.LogWarning("failed to spawn in enemy, due to no enemy infos or failed pick");
+                    continue;
+                }
+
                 GameObject enemy = Instantiate(
-                    instance.enemyPrefabs[Random.Range(0, instance.enemyPrefabs.Count)],
+                    enemyPrefab,
                     spawnPosition,
                     Quaternion.identity
                 );
                 instance.spawnedEnemies.Add(enemy);
             }
         }
+    }
+
+    private GameObject PickRandomEnemy()
+    {
+        float max = 0;
+        GameObject selected = null;
+        foreach(EnemySpawnInfo enemySpawn in enemyInfos)
+        {
+            float weightedRand = UnityEngine.Random.Range(0f, 1f) * enemySpawn.weight;
+            if (weightedRand > max)
+            {
+                max = weightedRand;
+                selected = enemySpawn.prefab;
+            }
+        }
+
+        return selected;
     }
 }

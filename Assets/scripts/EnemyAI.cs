@@ -72,6 +72,25 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float meleeWinddownDelay = 0.653f;
 
+    [Header("Ranged Attacks")]
+    [SerializeField]
+    private GameObject attackOrigin;
+
+    [SerializeField]
+    private GameObject bulletPrefab;
+
+    [SerializeField]
+    private float shotSpeed = 1;
+
+    [SerializeField]
+    private int shotCount = 10;
+
+    [SerializeField]
+    private float fireInterval = 0.3f;
+
+    [SerializeField]
+    private float reloadTime = 5;
+
     private enum MeleeState
     {
         None,
@@ -80,17 +99,28 @@ public class EnemyAI : MonoBehaviour
         Winddown,
     }
 
+    private enum RangedState
+    {
+        None,
+        Reloading,
+    }
+
     private MeleeState meleeState = MeleeState.None;
     private float meleeStateEndTime;
     private Vector3 lockedDirection;
     private bool lungeHit;
     private bool previousUpdateRotation;
 
+    private RangedState rangedState = RangedState.None;
+    private int currentShotCount;
+
     private NavMeshAgent agent;
     private Transform player;
     private Collider enemyCollider;
     private Collider playerCollider;
     private float nextAttackTime;
+    
+
 
     private CharacterAnimation characterAnimation;
 
@@ -119,6 +149,15 @@ public class EnemyAI : MonoBehaviour
             Debug.LogError(
                 "Player not found in the scene. Make sure the player has the 'Player' tag."
             );
+        }
+        if (attackOrigin == null)
+            attackOrigin = gameObject;
+
+        if (enemyType == EnemyType.Ranged)
+        {
+            if (bulletPrefab == null)
+                UnityEngine.Debug.LogError($"bullet prefab for ranged enemy {gameObject.name} is missing.");
+            currentShotCount = shotCount;
         }
     }
 
@@ -158,16 +197,10 @@ public class EnemyAI : MonoBehaviour
 
         if (distance <= detectionRadius)
         {
-            if (distance > attackRange)
-            {
-                agent.isStopped = false;
-                agent.SetDestination(player.position);
-            }
-            else
-            {
-                agent.isStopped = true;
-                Attack();
-            }
+            if (enemyType == EnemyType.Melee)
+                HandleMeleeAI(distance);
+            else if (enemyType == EnemyType.Ranged)
+                HandleRangedAI(distance);
         }
         else
         {
@@ -175,6 +208,46 @@ public class EnemyAI : MonoBehaviour
         }
 
         UpdateAnimatorSpeed();
+    }
+
+    private void HandleMeleeAI(float distance)
+    {
+        if (distance > attackRange)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+        }
+        else
+        {
+            agent.isStopped = true;
+            MeleeAttack();
+        }
+    }
+
+    private void HandleRangedAI(float distance)
+    {
+        if (distance > attackRange)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+        } else
+        {
+            agent.isStopped = true;
+
+            if (rangedState == RangedState.Reloading && Time.time >= nextAttackTime)
+            {
+                rangedState = RangedState.None;
+                currentShotCount = shotCount;
+            }
+
+            if (rangedState == RangedState.None)
+            {
+                Vector3 lookDir = player.position - transform.position; lookDir.y = 0;
+                transform.forward = lookDir.normalized;
+                RangedAttack();
+            }
+            
+        }
     }
 
     private void UpdateAnimatorSpeed()
@@ -270,7 +343,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private void Attack()
+    private void MeleeAttack()
     {
         if (enemyType == EnemyType.Melee)
         {
@@ -281,6 +354,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
+        // merian: tbh dont know what this stuff is actually doing, but gonna keep it anyway
         if (Time.time >= nextAttackTime)
         {
             characterAnimation.Attack();
@@ -292,6 +366,29 @@ public class EnemyAI : MonoBehaviour
             {
                 playerHealth.TakeDamage(attackDamage);
             }
+        }
+    }
+
+    private void RangedAttack()
+    {
+        if (bulletPrefab == null)
+            return;
+
+        if (Time.time >= nextAttackTime)
+        {
+            GameObject bulletObj = Instantiate(bulletPrefab, attackOrigin.transform.position, Quaternion.identity);
+            bulletObj.transform.forward = (player.position - attackOrigin.transform.position).normalized;
+            if (bulletObj.TryGetComponent(out Bullet bullet))
+            {
+                bullet.damage = attackDamage;
+                bullet.speed = shotSpeed;
+            }
+            currentShotCount--;
+            if (currentShotCount == 0) {
+                rangedState = RangedState.Reloading;
+                nextAttackTime = Time.time + reloadTime;
+            } else
+                nextAttackTime = Time.time + fireInterval;
         }
     }
 
