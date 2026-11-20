@@ -33,6 +33,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField]
     private Slider cooldownBar;
 
+    [SerializeField]
+    private AudioSource hitAudio;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -55,21 +58,35 @@ public class PlayerHealth : MonoBehaviour
         {
             healthTextObject.GetComponent<TextMeshProUGUI>().text = prefix + health.ToString("F0");
         }
-        var cooldown = GetComponent<PlayerController>().attackCooldown;
-        var nextAttackTime = GetComponent<PlayerController>().nextAttackTime;
+        
+        PlayerController playerController = GetComponent<PlayerController>();
+        WeaponManager weaponManager = GetComponent<WeaponManager>();
+        
+        // Show weapon cooldown only when weapon is equipped, otherwise show melee cooldown
+        float cooldown = playerController.attackCooldown;
+        float nextCooldownTime = playerController.NextMeleeAttackTime;
+        
+        if (weaponManager != null && weaponManager.EquippedWeapon != null)
+        {
+            cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+            nextCooldownTime = playerController.NextWeaponAttackTime;
+        }
+        
         if (cooldownBar != null)
         {
-            cooldownBar.value = 1 - ((nextAttackTime - Time.time) / cooldown);
+            cooldownBar.value = 1 - ((nextCooldownTime - Time.time) / cooldown);
         }
     }
 
     public void TakeDamage(float damage)
     {
+        if (PowerUpManager.instance.IsPowerUpActive(PowerUpType.Armor))
+        {
+            damage *= 0.5f; // Reduce damage by 50% if Armor power-up is active
+        }
         health -= damage;
         if (health < 0)
-        {
             health = 0;
-        }
         if (health == 0)
         {
             if (characterAnimation != null)
@@ -81,14 +98,12 @@ public class PlayerHealth : MonoBehaviour
                 gameMenusController.ShowDeathMenu();
             }
         }
+        if (hitAudio != null)
+            hitAudio.Play();
         if (characterAnimation != null)
-        {
             characterAnimation.Hit();
-        }
         if (healthBar != null)
-        {
             healthBar.value = health / maxHealth;
-        }
     }
 
     public void Heal(float amount)

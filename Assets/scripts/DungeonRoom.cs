@@ -23,6 +23,10 @@ public class DungeonRoom : MonoBehaviour
     public GameObject DoorE;
     public GameObject DoorW;
 
+    [Header("Boss Room")]
+    public GameObject BossFloor;
+    public GameObject BossLock;
+
     public RoomDefinition RoomDefinition;
 
     // Number of 90 degree clockwise rotations applied to RoomDefinition.Connections.

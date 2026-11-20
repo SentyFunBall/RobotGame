@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CharacterAnimation))]
+[RequireComponent(typeof(WeaponManager))]
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
@@ -25,15 +27,38 @@ public class PlayerController : MonoBehaviour
     private float sprintMod = 1.5f;
 
     [SerializeField]
+    private float sprintTime = 1.0f;
+
+    [SerializeField]
+    private float sprintCooldown = 4.0f;
+
+    private float sprintTimeRemaining;
+    private float sprintCooldownRemaining;
+    private bool sprintCooldownActive;
+
+    [SerializeField]
+    private Slider sprintBar;
+
+    [SerializeField]
     private LayerMask groundMask;
 
     [SerializeField]
     private float groundCheckDistance = 0.05f;
 
+    [Header("Audio")]
+    [SerializeField]
+    private AudioSource attackAudio;
+
+    [SerializeField]
+    private AudioSource rollingAudio;
+
     private PowerUpManager powerUpManager;
+    private WeaponManager weaponManager;
     private CharacterAnimation characterAnimation;
+    private bool grounded;
 
     private bool doAttack;
+    private bool doMeleeAttack;
 
     [SerializeField]
     private float attackRange = 2f;
@@ -48,12 +73,21 @@ public class PlayerController : MonoBehaviour
     public float attackCooldown = 2.0f;
 
     public float nextAttackTime;
+    private float nextMeleeAttackTime;
+    private float nextWeaponAttackTime;
+
+    public float NextMeleeAttackTime => nextMeleeAttackTime;
+    public float NextWeaponAttackTime => nextWeaponAttackTime;
+
+    [SerializeField]
+    private ShopItem debugItem;
 
     void Awake()
     {
         controls = new InputSystem_Actions();
         characterAnimation = GetComponent<CharacterAnimation>();
         characterAnimation.FindAndSetAnimator();
+        weaponManager = GetComponent<WeaponManager>();
     }
 
     void OnEnable()
@@ -64,6 +98,9 @@ public class PlayerController : MonoBehaviour
     void OnDisable()
     {
         controls.Disable();
+        if (rollingAudio != null)
+            rollingAudio.Stop();
+        grounded = false;
     }
 
     void Start()
@@ -76,31 +113,147 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError("CharacterAnimation not found on player.");
         }
+        if (attackAudio == null || attackAudio.clip == null)
+            Debug.LogError("Player attack audio source or clip is not assigned.", this);
+        if (rollingAudio == null || rollingAudio.clip == null)
+            Debug.LogError("Player rolling audio source or clip is not assigned.", this);
+
+        sprintTimeRemaining = sprintTime;
+        sprintCooldownRemaining = 0f;
+        sprintCooldownActive = false;
+
+        if (sprintBar == null)
+        {
+            Debug.LogError("SprintBar slider not assigned.", this);
+        }
+        else
+        {
+            sprintBar.value = 1f;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (powerUpManager.IsPowerUpActive(PowerUpType.Stealth))
+        {
+            rollingAudio.volume = 0.0585f; // Reduce volume by 50% if Stealth power-up is active
+        }
+        else
+        {
+            rollingAudio.volume = 0.117f;
+        }
         if (GetComponent<PlayerHealth>().Health <= 0)
         {
             moveInput = Vector2.zero;
+            if (rollingAudio != null && rollingAudio.isPlaying)
+                rollingAudio.Stop();
             return;
+        }
+
+        if (Time.timeScale == 0f)
+        {
+            moveInput = Vector2.zero;
+            doAttack = false;
+            if (rollingAudio != null && rollingAudio.isPlaying)
+                rollingAudio.Stop();
+            return;
+        }
+
+        if (rollingAudio != null)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            bool shouldRoll =
+                Time.timeScale > 0f
+                && grounded
+                && new Vector2(velocity.x, velocity.z).sqrMagnitude > 0.01f;
+            if (shouldRoll && !rollingAudio.isPlaying)
+                rollingAudio.Play();
+            else if (!shouldRoll && rollingAudio.isPlaying)
+                rollingAudio.Stop();
         }
 
         moveInput = controls.Player.Move.ReadValue<Vector2>();
         isSlow = controls.Player.Crouch.ReadValue<float>() > 0.5f;
-        isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
         isSpeedPowerUpActive = powerUpManager.IsPowerUpActive(PowerUpType.Speed);
+
+        // Handle sprint cooldown
+        if (isSpeedPowerUpActive)
+        {
+            if (sprintCooldownActive)
+            {
+                sprintCooldownRemaining -= Time.deltaTime;
+                if (sprintCooldownRemaining <= 0f)
+                {
+                    sprintCooldownActive = false;
+                    sprintTimeRemaining = sprintTime;
+                    sprintCooldownRemaining = 0f;
+                }
+            }
+
+            isSprint = controls.Player.Sprint.ReadValue<float>() > 0.5f;
+
+            // Only allow sprinting if not in cooldown and have time remaining
+            if (isSprint && !sprintCooldownActive)
+            {
+                sprintTimeRemaining -= Time.deltaTime;
+                if (sprintTimeRemaining <= 0f)
+                {
+                    sprintTimeRemaining = 0f;
+                    sprintCooldownActive = true;
+                    sprintCooldownRemaining = sprintCooldown;
+                    isSprint = false;
+                }
+            }
+            else
+            {
+                isSprint = false;
+            }
+
+            // Update sprint bar
+            if (sprintBar != null)
+            {
+                if (sprintCooldownActive)
+                {
+                    // Show elapsed cooldown time (empty to full as cooldown completes)
+                    sprintBar.value = 1.0f - (sprintCooldownRemaining / sprintCooldown);
+                }
+                else
+                {
+                    sprintBar.value = sprintTimeRemaining / sprintTime;
+                }
+            }
+        }
+        else
+        {
+            isSprint = false;
+        }
+
         // Latch the press: Update can run several times between FixedUpdates, and
         // overwriting with `triggered` each frame dropped most attack inputs
         if (controls.Player.Attack.triggered)
             doAttack = true;
+
+        if (
+            (controls.Player.Attack.triggered && !GetComponent<WeaponManager>().HasAnyWeapon())
+            || controls.Player.SecondaryAttack.triggered
+        )
+            doMeleeAttack = true;
 
 #if UNITY_EDITOR
         bool t = controls.Player.DEBUGAddPowerUp.triggered;
         if (t)
         {
             powerUpManager.ActivatePowerUp(PowerUpType.Speed);
+            sprintTimeRemaining = sprintTime;
+            sprintCooldownRemaining = 0f;
+            sprintCooldownActive = false;
+
+            if (debugItem != null)
+            {
+                GetComponent<WeaponManager>().AddWeapon(debugItem);
+                GetComponent<WeaponManager>().EquipWeapon(debugItem);
+            }
         }
 #endif
     }
@@ -122,7 +275,7 @@ public class PlayerController : MonoBehaviour
         Vector3 velocityChange = desiredVelocity - velocity;
 
         Bounds colliderBounds = playerCollider.bounds;
-        bool grounded = Physics.Raycast(
+        grounded = Physics.Raycast(
             colliderBounds.center,
             Vector3.down,
             out RaycastHit hit,
@@ -175,80 +328,349 @@ public class PlayerController : MonoBehaviour
         if (characterAnimation != null)
         {
             if (isSprint && isSpeedPowerUpActive)
+            {
                 characterAnimation.Sprint(speed);
+            }
             else
+            {
+                characterAnimation.Sprint(0);
                 characterAnimation.SetMovementSpeed(speed);
+            }
         }
 
         // Attack
-        if (doAttack)
+        if (doAttack || doMeleeAttack)
         {
+            // Clear input flags immediately to prevent buffering
+            bool tryMelee = doMeleeAttack;
+            bool tryWeapon = doAttack;
             doAttack = false;
-            if (Time.time < nextAttackTime)
-                return;
-            nextAttackTime = Time.time + attackCooldown;
-            Transform playerChild = transform.GetChild(0);
-            Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
-            // Cast from body height; the child pivot is at the feet, below enemy colliders
-            Vector3 origin = playerCollider.bounds.center;
-            const float attackRadius = 1.0f;
-            bool hitTarget = false;
-            Collider[] closeTargets = Physics.OverlapSphere(
-                origin,
-                attackRadius,
-                enemyMask,
-                QueryTriggerInteraction.Ignore
-            );
-            foreach (Collider closeTarget in closeTargets)
+            doMeleeAttack = false;
+
+            // Try melee attack first if requested
+            if (tryMelee)
             {
-                Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
-                if (targetOffset.sqrMagnitude < Mathf.Epsilon)
-                    targetOffset = closeTarget.bounds.center - origin;
-                targetOffset.y = 0f;
-                if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget))
+                if (Time.time >= nextMeleeAttackTime)
                 {
-                    hitTarget = true;
-                    break;
+                    nextMeleeAttackTime = Time.time + attackCooldown;
+                    DoMeleeAttack();
                 }
+                return;
             }
 
-            if (
-                !hitTarget
-                && Physics.SphereCast(
-                    origin,
-                    attackRadius,
-                    attackDir,
-                    out RaycastHit hitInfo,
-                    attackRange,
-                    enemyMask,
-                    QueryTriggerInteraction.Ignore
-                )
-            )
+            // Try weapon attack if requested and no weapon equipped = use melee
+            if (tryWeapon || weaponManager.EquippedWeapon == null)
             {
-                TryDamageTarget(hitInfo.collider);
+                if (weaponManager.EquippedWeapon == null)
+                {
+                    // No weapon - do melee
+                    if (Time.time >= nextMeleeAttackTime)
+                    {
+                        nextMeleeAttackTime = Time.time + attackCooldown;
+                        DoMeleeAttack();
+                    }
+                }
+                else
+                {
+                    // Have weapon - do weapon attack
+                    if (Time.time >= nextWeaponAttackTime)
+                    {
+                        float cooldown = weaponManager.EquippedWeapon.weaponCooldown;
+                        nextWeaponAttackTime = Time.time + cooldown;
+                        nextAttackTime = nextWeaponAttackTime; // For UI
+                        DoWeaponAttack();
+                    }
+                }
+                return;
             }
-            characterAnimation.Attack();
         }
     }
 
-    private bool TryDamageTarget(Collider targetCollider)
+    private bool TryDamageTarget(Collider targetCollider, bool melee)
     {
+        float damage = attackDamage;
+        if (!melee)
+        {
+            damage = Mathf.Max(
+                0f,
+                weaponManager.EquippedWeapon != null
+                    ? weaponManager.EquippedWeapon.weaponDamage
+                    : 0f
+            );
+        }
         EnemyAI enemy = targetCollider.GetComponentInParent<EnemyAI>();
         if (enemy != null)
         {
-            enemy.TakeDamage(attackDamage);
+            enemy.TakeDamage(damage);
             Debug.Log("Hit");
+
+            if (attackAudio != null)
+                attackAudio.Play();
             return true;
         }
 
         RobotBossAI boss = targetCollider.GetComponentInParent<RobotBossAI>();
         if (boss != null)
         {
-            boss.TakeDamage(attackDamage);
+            boss.TakeDamage(damage);
             Debug.Log("Hit Boss");
+
+            if (attackAudio != null)
+                attackAudio.Play();
+
             return true;
         }
 
         return false;
+    }
+
+    public void SetSprintSlider(Slider slider)
+    {
+        sprintBar = slider;
+        if (sprintBar != null)
+        {
+            sprintBar.value = 1f;
+        }
+    }
+
+    private void DoMeleeAttack()
+    {
+        Transform playerChild = transform.GetChild(0);
+        Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+        // Cast from body height; the child pivot is at the feet, below enemy colliders
+        Vector3 origin = playerCollider.bounds.center;
+        const float attackRadius = 1.0f;
+        bool hitTarget = false;
+        Collider[] closeTargets = Physics.OverlapSphere(
+            origin,
+            attackRadius,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+        foreach (Collider closeTarget in closeTargets)
+        {
+            Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
+            if (targetOffset.sqrMagnitude < Mathf.Epsilon)
+                targetOffset = closeTarget.bounds.center - origin;
+            targetOffset.y = 0f;
+            if (Vector3.Dot(attackDir, targetOffset) >= 0f && TryDamageTarget(closeTarget, true))
+            {
+                hitTarget = true;
+                break;
+            }
+        }
+
+        if (
+            !hitTarget
+            && Physics.SphereCast(
+                origin,
+                attackRadius,
+                attackDir,
+                out RaycastHit hitInfo,
+                attackRange,
+                enemyMask,
+                QueryTriggerInteraction.Ignore
+            )
+        )
+        {
+            TryDamageTarget(hitInfo.collider, true);
+        }
+        characterAnimation.Attack();
+    }
+
+    private void DoWeaponAttack()
+    {
+        ShopItem weapon = weaponManager.EquippedWeapon;
+        if (weapon == null)
+            return;
+
+        switch (weapon.weaponType)
+        {
+            case WeaponType.Ranged:
+                DoRangedAttack(weapon);
+                break;
+            case WeaponType.EMP:
+                DoEMPAttack(weapon);
+                break;
+            case WeaponType.Bazooka:
+                DoBazookaAttack(weapon);
+                break;
+            case WeaponType.Rail:
+                DoRailAttack(weapon);
+                break;
+        }
+    }
+
+    private void DoRangedAttack(ShopItem weapon)
+    {
+        GameObject bulletPrefabToUse = weapon.bulletPrefab;
+        Vector3 forward = transform.GetChild(0).forward;
+        if (bulletPrefabToUse == null)
+            return;
+
+        GameObject bullet = Instantiate(
+            bulletPrefabToUse,
+            transform.position + forward,
+            Quaternion.identity
+        );
+        bullet.transform.forward = forward;
+        bullet.GetComponent<Rigidbody>().linearVelocity = forward * 20f;
+        Bullet bulletComponent = bullet.GetComponent<Bullet>();
+        if (bulletComponent != null)
+            bulletComponent.parentWeapon = weapon;
+        despawnBulletAfterDelay(bullet, weapon.weaponRange / 10f);
+    }
+
+    private void DoEMPAttack(ShopItem weapon)
+    {
+        Transform playerChild = transform.GetChild(0);
+        Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+        Vector3 origin = playerCollider.bounds.center;
+        const float attackRadius = 1.0f;
+
+        float range = Mathf.Max(attackRange, weapon.weaponRange);
+
+        bool hitTarget = false;
+        Collider[] closeTargets = Physics.OverlapSphere(
+            origin,
+            range,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+
+        UnityEngine.Debug.Log("Close targets found: " + closeTargets.Length);
+        foreach (Collider closeTarget in closeTargets)
+        {
+            Vector3 targetOffset = closeTarget.ClosestPoint(origin) - origin;
+            if (targetOffset.sqrMagnitude < Mathf.Epsilon)
+                targetOffset = closeTarget.bounds.center - origin;
+            targetOffset.y = 0f;
+            if (Vector3.Dot(attackDir, targetOffset) >= 0f)
+            {
+                ApplyEMPFreeze(closeTarget, weapon.weaponDamage);
+                hitTarget = true;
+            }
+        }
+
+        if (!hitTarget)
+        {
+            if (
+                Physics.SphereCast(
+                    origin,
+                    attackRadius,
+                    attackDir,
+                    out RaycastHit hitInfo,
+                    range,
+                    enemyMask,
+                    QueryTriggerInteraction.Ignore
+                )
+            )
+            {
+                ApplyEMPFreeze(hitInfo.collider, weapon.weaponDamage);
+            }
+        }
+    }
+
+    private void ApplyEMPFreeze(Collider targetCollider, float duration)
+    {
+        EnemyAI enemy = targetCollider.GetComponentInParent<EnemyAI>();
+        if (enemy != null)
+        {
+            enemy.Freeze(duration);
+            if (attackAudio != null)
+                attackAudio.Play();
+        }
+    }
+
+    private void DoBazookaAttack(ShopItem weapon)
+    {
+        GameObject bulletPrefabToUse = weapon.bulletPrefab;
+        if (bulletPrefabToUse == null)
+            return;
+
+        Vector3 forward = transform.GetChild(0).forward;
+        GameObject rocket = Instantiate(
+            bulletPrefabToUse,
+            transform.position + (1.0f * forward),
+            Quaternion.identity
+        );
+        Rigidbody rb = rocket.GetComponent<Rigidbody>();
+        rocket.transform.forward = forward;
+        if (rb != null)
+            rb.linearVelocity = forward * 25f;
+
+        Rocket bulletComponent = rocket.GetComponent<Rocket>();
+        if (bulletComponent != null)
+            bulletComponent.parentWeapon = weapon;
+
+        despawnBulletAfterDelay(rocket, 10f);
+    }
+
+    private void DoRailAttack(ShopItem weapon)
+    {
+        Transform playerChild = transform.GetChild(0);
+        Vector3 attackDir = Vector3.ProjectOnPlane(playerChild.forward, Vector3.up).normalized;
+        Vector3 origin = playerCollider.bounds.center;
+
+        GameObject railEffect = Instantiate(
+            weapon.bulletPrefab,
+            origin,
+            Quaternion.LookRotation(attackDir)
+        );
+        StartCoroutine(RailBulletCoroutine(railEffect, 2f));
+
+        float range = Mathf.Max(attackRange, weapon.weaponRange);
+
+        RaycastHit[] hits = Physics.RaycastAll(
+            origin,
+            attackDir,
+            range,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+
+        float damage = Mathf.Max(0f, attackDamage + weapon.weaponDamage);
+
+        foreach (RaycastHit hit in hits)
+        {
+            EnemyAI enemy = hit.collider.GetComponentInParent<EnemyAI>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(damage);
+                if (attackAudio != null)
+                    attackAudio.Play();
+            }
+
+            RobotBossAI boss = hit.collider.GetComponentInParent<RobotBossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(damage);
+                if (attackAudio != null)
+                    attackAudio.Play();
+                break;
+            }
+        }
+    }
+
+    private void despawnBulletAfterDelay(GameObject bullet, float delay)
+    {
+        Destroy(bullet, delay);
+    }
+
+    private System.Collections.IEnumerator RailBulletCoroutine(GameObject railEffect, float delay)
+    {
+        // Move the rail effect forward over time (optional, depending on your effect)
+        float elapsedTime = 0f;
+        while (elapsedTime < delay)
+        {
+            if (railEffect != null)
+                railEffect.transform.position +=
+                    railEffect.transform.forward * Time.deltaTime * 25f;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        if (railEffect != null)
+            Destroy(railEffect);
     }
 }

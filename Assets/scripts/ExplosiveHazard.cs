@@ -67,6 +67,9 @@ public class ExplosiveHazard : MonoBehaviour
     [SerializeField]
     private float maxLightIntensity = 6f;
 
+    [SerializeField]
+    private AudioSource explosionAudio;
+
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
@@ -208,6 +211,9 @@ public class ExplosiveHazard : MonoBehaviour
 
     private void Explode()
     {
+        if (explosionAudio != null)
+            explosionAudio.Play();
+
         hasExploded = true;
 
         if (explosionVfxPrefab != null)
@@ -224,7 +230,10 @@ public class ExplosiveHazard : MonoBehaviour
             if (playerHealth != null && damagedRoots.Add(playerHealth.gameObject))
             {
                 playerHealth.TakeDamage(playerDamage);
-                ApplyKnockback(playerHealth.GetComponent<Rigidbody>(), playerHealth.transform.position);
+                ApplyKnockback(
+                    playerHealth.GetComponent<Rigidbody>(),
+                    playerHealth.transform.position
+                );
                 continue;
             }
 
@@ -245,7 +254,12 @@ public class ExplosiveHazard : MonoBehaviour
             }
         }
 
-        Destroy(gameObject);
+        MeshRenderer[] meshRenderers = GetComponentsInChildren<MeshRenderer>();
+        foreach (MeshRenderer mr in meshRenderers)
+        {
+            mr.enabled = false;
+        }
+        Destroy(gameObject, 2f);
     }
 
     private void ApplyKnockback(Rigidbody targetRb, Vector3 targetPos)

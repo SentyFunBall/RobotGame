@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using static SpawnUtility;
 
 public enum DetectionState
 {
@@ -77,6 +78,19 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float meleeWinddownDelay = 0.653f;
 
+    [SerializeField]
+    private AudioSource stepAudio;
+
+    [SerializeField]
+    private AudioSource hitAudio;
+
+    [SerializeField]
+    private AudioSource attackAudio;
+
+    [Header("Loot")]
+    [SerializeField]
+    private GameObject lootPrefab;
+
     private enum MeleeState
     {
         None,
@@ -148,8 +162,11 @@ public class EnemyAI : MonoBehaviour
     private Collider enemyCollider;
     private Collider playerCollider;
     private float nextAttackTime;
+    private Vector3 previousPosition;
 
     private CharacterAnimation characterAnimation;
+
+    private float freezeEndTime = 0f;
 
     private void Awake()
     {
@@ -161,6 +178,20 @@ public class EnemyAI : MonoBehaviour
 
         renderers = GetComponentsInChildren<Renderer>();
         propBlock = new MaterialPropertyBlock();
+
+        if (stepAudio != null)
+            stepAudio.loop = true;
+    }
+
+    private void OnEnable()
+    {
+        previousPosition = transform.position;
+    }
+
+    private void OnDisable()
+    {
+        if (stepAudio != null)
+            stepAudio.Stop();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -186,6 +217,13 @@ public class EnemyAI : MonoBehaviour
             return;
         if (player == null)
         {
+            return;
+        }
+
+        bool isFrozen = Time.time < freezeEndTime;
+        if (isFrozen)
+        {
+            agent.isStopped = true;
             return;
         }
 
@@ -219,6 +257,10 @@ public class EnemyAI : MonoBehaviour
                 detectionRadius = detectionRadiusSneak;
                 break;
         }
+        if (PowerUpManager.instance.IsPowerUpActive(PowerUpType.Stealth))
+        {
+            detectionRadius *= 0.5f; // Reduce detection radius by 50% if Stealth power-up is active
+        }
 
         if (distance <= detectionRadius)
         {
@@ -239,6 +281,24 @@ public class EnemyAI : MonoBehaviour
         }
 
         UpdateAnimatorSpeed();
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 position = transform.position;
+        if (stepAudio != null)
+        {
+            bool moving =
+                agent.isActiveAndEnabled
+                && Time.timeScale > 0f
+                && (position - previousPosition).sqrMagnitude > 0f
+                && !agent.isStopped;
+            if (moving && !stepAudio.isPlaying)
+                stepAudio.Play();
+            else if (!moving && stepAudio.isPlaying)
+                stepAudio.Stop();
+        }
+        previousPosition = position;
     }
 
     private void UpdateAnimatorSpeed()
@@ -446,12 +506,20 @@ public class EnemyAI : MonoBehaviour
         PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
         if (playerHealth != null)
         {
-            playerHealth.TakeDamage(attackDamage);
+            playerHealth.TakeDamage(
+                attackDamage * DungeonGenerator.Instance.Difficulty.EnemyStrength
+            );
         }
     }
 
     private void Attack()
     {
+        if (Time.time < nextAttackTime)
+            return;
+
+        if (attackAudio != null && attackAudio.clip != null)
+            attackAudio.PlayOneShot(attackAudio.clip);
+
         if (enemyType == EnemyType.Melee)
         {
             if (Time.time >= nextAttackTime)
@@ -470,17 +538,16 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        if (Time.time >= nextAttackTime)
-        {
-            characterAnimation.Attack();
-            nextAttackTime = Time.time + 3f; // Assuming 3 second cooldown between attacks
+        characterAnimation.Attack();
+        nextAttackTime = Time.time + 3f; // Assuming 3 second cooldown between attacks
 
-            // Apply damage to the player
-            PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(attackDamage);
-            }
+        // Apply damage to the player
+        PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(
+                attackDamage * DungeonGenerator.Instance.Difficulty.EnemyStrength
+            );
         }
     }
 
@@ -490,12 +557,21 @@ public class EnemyAI : MonoBehaviour
     public void TakeDamage(float damage)
     {
         health -= damage;
+        Flash();
+        if (GetComponent<AudioSource>() != null)
+        {
+            hitAudio.Play();
+        }
         if (health <= 0f && !dying)
         {
             dying = true;
             Die();
         }
-        Flash();
+    }
+
+    public void Freeze(float duration)
+    {
+        freezeEndTime = Time.time + duration;
     }
 
     private void Die()
@@ -511,9 +587,24 @@ public class EnemyAI : MonoBehaviour
             characterAnimation.SetDead(true);
         }
         agent.enabled = false;
+        if (stepAudio != null)
+            stepAudio.Stop();
         if (enemyCollider != null)
             enemyCollider.enabled = false;
+        SpawnLoot();
         StartCoroutine(ShrinkAndDisable());
+    }
+
+    private void SpawnLoot()
+    {
+        if (lootPrefab == null)
+            return;
+
+        if (TryGetRandomNavMeshPosition(transform.position, 2f, out Vector3 spawnPosition))
+        {
+            GameObject newLoot = Instantiate(lootPrefab);
+            newLoot.transform.position = spawnPosition;
+        }
     }
 
     private System.Collections.IEnumerator ShrinkAndDisable()
