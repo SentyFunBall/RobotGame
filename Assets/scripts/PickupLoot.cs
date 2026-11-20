@@ -12,7 +12,7 @@ public class PickupLoot : MonoBehaviour
     void Update()
     {
         if (textMesh != null && textMesh.TryGetComponent(out TextMeshProUGUI gui))
-            gui.text = lootPrefix + lootCount.ToString() + "/" + LootGenerator.totalLootCount.ToString();
+            gui.text = lootPrefix + lootCount.ToString();
     }
 
     void OnTriggerEnter(Collider collision)

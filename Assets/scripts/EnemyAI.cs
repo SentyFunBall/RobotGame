@@ -378,7 +378,7 @@ public class EnemyAI : MonoBehaviour
         {
             GameObject bulletObj = Instantiate(bulletPrefab, attackOrigin.transform.position, Quaternion.identity);
             bulletObj.transform.forward = (player.position - attackOrigin.transform.position).normalized;
-            if (bulletObj.TryGetComponent(out Bullet bullet))
+            if (bulletObj.TryGetComponent(out EnemyBullet bullet))
             {
                 bullet.damage = attackDamage;
                 bullet.speed = shotSpeed;

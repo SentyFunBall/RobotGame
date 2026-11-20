@@ -2,7 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider))]
 [RequireComponent(typeof(Rigidbody))]
-public class Bullet : MonoBehaviour
+public class EnemyBullet : MonoBehaviour
 {
 	public float damage = 10;
 	public float speed = 1;
