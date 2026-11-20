@@ -116,6 +116,22 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private Color heavyTelegraphColor = new Color(1f, 0.45f, 0f);
 
+    [Header("Heavy Animation")]
+    [SerializeField]
+    [Tooltip("Exact Bool parameter name in the Heavy Animator Controller.")]
+    private string heavyWalkingBoolParam = "IsWalking";
+
+    [SerializeField]
+    [Tooltip("Exact Trigger parameter name for the Heavy attack.")]
+    private string heavyAttackTriggerParam = "Attack";
+
+    [SerializeField]
+    [Tooltip("Exact Trigger parameter name for the Heavy death animation.")]
+    private string heavyDieTriggerParam = "Die";
+
+    [SerializeField]
+    private float heavyWalkSpeedThreshold = 0.1f;
+
     private enum HeavyState
     {
         None,
@@ -230,6 +246,12 @@ public class EnemyAI : MonoBehaviour
         if (characterAnimation != null)
         {
             float speed = meleeState == MeleeState.Lunge ? lungeSpeed : agent.velocity.magnitude;
+            if (enemyType == EnemyType.Heavy)
+            {
+                bool isWalking = heavyState == HeavyState.None && speed > heavyWalkSpeedThreshold;
+                characterAnimation.SetBool(heavyWalkingBoolParam, isWalking);
+                return;
+            }
             characterAnimation.SetMovementSpeed(speed);
         }
     }
@@ -304,7 +326,8 @@ public class EnemyAI : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(lockedDirection, Vector3.up);
 
         nextAttackTime = Time.time + heavyAttackCooldown;
-        characterAnimation.Attack();
+        characterAnimation.SetBool(heavyWalkingBoolParam, false);
+        characterAnimation.SetTrigger(heavyAttackTriggerParam);
         agent.isStopped = true;
         agent.ResetPath();
         agent.velocity = Vector3.zero;
@@ -478,7 +501,15 @@ public class EnemyAI : MonoBehaviour
     private void Die()
     {
         heavyState = HeavyState.None;
-        characterAnimation.SetDead(true);
+        if (enemyType == EnemyType.Heavy)
+        {
+            characterAnimation.SetBool(heavyWalkingBoolParam, false);
+            characterAnimation.SetTrigger(heavyDieTriggerParam);
+        }
+        else
+        {
+            characterAnimation.SetDead(true);
+        }
         agent.enabled = false;
         if (enemyCollider != null)
             enemyCollider.enabled = false;
