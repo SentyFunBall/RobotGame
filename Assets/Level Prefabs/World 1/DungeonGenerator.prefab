@@ -60,6 +60,7 @@ GameObject:
   - component: {fileID: 8210849616483783966}
   - component: {fileID: 12024080088310658}
   - component: {fileID: 2963013905793896106}
+  - component: {fileID: 7980588429019039417}
   m_Layer: 0
   m_Name: DungeonGenerator
   m_TagString: Untagged
@@ -102,6 +103,8 @@ MonoBehaviour:
     Size: 12
     RoomCount: 20
     numberOfEnemies: 5
+    shopItemCostMult: 0
+    level: 0
   robotBossPrefab: {fileID: 376409455819940113, guid: 20588da1cb0e4c548b94acbd2069b15d, type: 3}
   navMesh: {fileID: 1146306886610198402}
   navMeshLinkWidth: 10
@@ -136,3 +139,22 @@ MonoBehaviour:
   maxLootInDungeon: 100
   minLootInDungeon: 10
   lootPrefab: {fileID: 9085376655905517556, guid: 7ae8afebc6aae4ba0bfcd527376ebfc3, type: 3}
+--- !u!114 &7980588429019039417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462631502958609099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a2fcf21465b4d4f851c4d6e6cc6f61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HazardGenerator
+  hazardPrefabs:
+  - {fileID: 5831412806133714900, guid: f874623f0ccd5ed42a151c0a7d454cb3, type: 3}
+  maxHazardsPerRoom: 1
+  spawnOffsetRadius: 4
+  minHazardSpacing: 9
+  trapRoomChanceMultiplier: 2
+  yOffset: 0

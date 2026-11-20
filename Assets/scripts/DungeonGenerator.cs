@@ -6,8 +6,8 @@ using UnityEngine;
 [System.Serializable]
 public class DungeonDifficulty
 {
-    [Range(0, 100)]
-    public int EnemyStrength;
+    [Range(0, 5)]
+    public float EnemyStrength;
 
     [Range(0, 100)]
     public int PuzzleComplexity;
@@ -23,6 +23,10 @@ public class DungeonDifficulty
 
     [Range(0, 100)]
     public int numberOfEnemies;
+
+    [Range(0, 10)]
+    public int shopItemCostMult;
+    public int level;
 }
 
 public struct OpenConnection
@@ -70,6 +74,9 @@ public class DungeonGenerator : MonoBehaviour
     public void Reset()
     {
         GetComponent<LootGenerator>().Reset();
+        HazardGenerator hazardGenerator = GetComponent<HazardGenerator>();
+        if (hazardGenerator != null)
+            hazardGenerator.Reset();
         GenerateNavMesh.Reset();
 
         ClearRooms();
@@ -107,31 +114,37 @@ public class DungeonGenerator : MonoBehaviour
         switch (difficultyName)
         {
             case "Easy":
-                Difficulty.EnemyStrength = 5;
+                Difficulty.EnemyStrength = 0.7f;
                 Difficulty.PuzzleComplexity = 5;
                 Difficulty.TrapFrequency = 5;
                 Difficulty.Size = 12;
                 Difficulty.RoomCount = 15;
                 Difficulty.numberOfEnemies = 5;
+                Difficulty.shopItemCostMult = 1;
+                Difficulty.level = 1;
                 break;
 
             case "Hard":
-                Difficulty.EnemyStrength = 45;
+                Difficulty.EnemyStrength = 2.0f;
                 Difficulty.PuzzleComplexity = 45;
                 Difficulty.TrapFrequency = 45;
                 Difficulty.Size = 12;
                 Difficulty.RoomCount = 50;
                 Difficulty.numberOfEnemies = 20;
+                Difficulty.shopItemCostMult = 5;
+                Difficulty.level = 3;
                 break;
 
             case "Medium":
             default:
-                Difficulty.EnemyStrength = 25;
+                Difficulty.EnemyStrength = 1.0f;
                 Difficulty.PuzzleComplexity = 25;
                 Difficulty.TrapFrequency = 25;
                 Difficulty.Size = 12;
-                Difficulty.RoomCount = 30;
-                Difficulty.numberOfEnemies = 12;
+                Difficulty.RoomCount = 50;
+                Difficulty.numberOfEnemies = 25;
+                Difficulty.shopItemCostMult = 2;
+                Difficulty.level = 2;
                 break;
         }
     }
@@ -787,6 +800,7 @@ public class DungeonGenerator : MonoBehaviour
 
     private void GenerateDungeonInternal(bool spawnEnemiesAndLoot, bool useBossEnd)
     {
+        UnityEngine.Debug.Log("Starting dungeon generation. Difficulty: " + Difficulty.level);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
@@ -813,6 +827,9 @@ public class DungeonGenerator : MonoBehaviour
             if (useBossEnd)
                 SpawnBoss();
             StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
+            HazardGenerator hazardGenerator = GetComponent<HazardGenerator>();
+            if (hazardGenerator != null)
+                StartCoroutine(hazardGenerator.GenerateHazards());
         }
 
         //MovePlayerToStart();
@@ -868,8 +885,14 @@ public class DungeonGenerator : MonoBehaviour
         BossDefeated = robotBossPrefab == null || endRoom == null;
         if (robotBossPrefab != null && endRoom != null)
         {
-            Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 1f, endRoom.GridPosition.z);
-            Instantiate(robotBossPrefab, spawnPos, Quaternion.identity);
+            Vector3 spawnPos = new Vector3(endRoom.GridPosition.x, 7f, endRoom.GridPosition.z);
+            GameObject boss = Instantiate(robotBossPrefab, spawnPos, Quaternion.identity);
+            boss.transform.SetParent(endRoom.transform, true);
+            RobotBossAI bossAI = boss.GetComponent<RobotBossAI>();
+            if (bossAI != null)
+                bossAI.PrepareDrop();
+            else
+                UnityEngine.Debug.LogError("Boss prefab is missing RobotBossAI.", boss);
         }
     }
 }

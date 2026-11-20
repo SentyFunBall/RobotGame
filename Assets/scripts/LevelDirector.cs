@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class LevelDirector : MonoBehaviour
@@ -14,8 +15,15 @@ public class LevelDirector : MonoBehaviour
     private static GameObject player;
     private static DungeonGenerator dungeonGenerator;
 
+    [SerializeField]
+    private AudioClip bossStart;
+
+    private DungeonRoom startedBossRoom;
+
     void Start()
     {
+        currentLevelState = LevelState.Stage1;
+        PickupLoot.lootCount = 0;
         player = GameObject.FindWithTag("Player");
         dungeonGenerator = FindAnyObjectByType<DungeonGenerator>();
         if (dungeonGenerator == null)
@@ -29,11 +37,20 @@ public class LevelDirector : MonoBehaviour
             dungeonGenerator.Reset();
             dungeonGenerator.GenerateDungeon(currentLevelState == LevelState.Stage2);
         }
+
+        MusicManager musicManager = FindAnyObjectByType<MusicManager>();
+        if (musicManager != null)
+        {
+            musicManager.ChangeVolume(0.2f);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (player == null)
+            return;
+
         // When player gets close to end room of stage 1, show menu screen
         if (
             DungeonGenerator.EndRoom != null
@@ -74,15 +91,68 @@ public class LevelDirector : MonoBehaviour
                 }
             }
         }
+
+        if (
+            currentLevelState == LevelState.Stage2
+            && DungeonGenerator.EndRoom != null
+            && DungeonGenerator.EndRoom != startedBossRoom
+            && IsPlayerInsideBossRoom()
+        )
+        {
+            startedBossRoom = DungeonGenerator.EndRoom;
+            StartCoroutine(StartBossFight(startedBossRoom));
+        }
+    }
+
+    private static bool IsPlayerInsideBossRoom()
+    {
+        if (player == null || dungeonGenerator == null || DungeonGenerator.EndRoom == null)
+            return false;
+
+        float halfSize = dungeonGenerator.Difficulty.Size * 0.5f - 1f;
+        Vector3 position = player.transform.position;
+        Vector3Int center = DungeonGenerator.EndRoom.GridPosition;
+        return Mathf.Abs(position.x - center.x) < halfSize
+            && Mathf.Abs(position.z - center.z) < halfSize;
+    }
+
+    private IEnumerator StartBossFight(DungeonRoom room)
+    {
+        if (bossStart != null)
+            AudioSource.PlayClipAtPoint(bossStart, player.transform.position, 2.0f);
+        else
+            Debug.LogError("Boss start sound is not assigned.", this);
+
+        yield return new WaitForSeconds(1.5f);
+        yield return new WaitUntil(() => room == null || IsPlayerInsideBossRoom());
+
+        if (room == null || room != DungeonGenerator.EndRoom)
+            yield break;
+
+        if (room.BossFloor != null)
+            Destroy(room.BossFloor);
+        else
+            Debug.LogError("Boss room floor is not assigned.", room);
+
+        if (room.BossLock != null)
+            room.BossLock.SetActive(true);
+        else
+            Debug.LogError("Boss room lock is not assigned.", room);
+
+        RobotBossAI boss = room.GetComponentInChildren<RobotBossAI>();
+        if (boss != null)
+            boss.Drop();
+        else
+            Debug.LogError("Boss room has no boss to drop.", room);
     }
 
     // Called by the shop to advance to the next level
-    public static void AdvanceLevel()
+    public void AdvanceLevel()
     {
         if (currentLevelState == LevelState.Shop1)
             currentLevelState = LevelState.Stage2;
-        else if (currentLevelState == LevelState.Stage2)
-            currentLevelState = LevelState.Shop2;
+        else if (currentLevelState != LevelState.Shop2)
+            return;
 
         GameMenusController menus = FindAnyObjectByType<GameMenusController>();
         if (menus != null)
@@ -103,8 +173,8 @@ public class LevelDirector : MonoBehaviour
         }
         else if (currentLevelState == LevelState.Shop2)
         {
-            menus.Resume();
-            menus.ShowWinMenu();
+            if (menus != null)
+                menus.ShowWinMenu();
         }
     }
 
@@ -114,11 +184,22 @@ public class LevelDirector : MonoBehaviour
             currentLevelState = LevelState.Shop1;
         else if (currentLevelState == LevelState.Stage2)
             currentLevelState = LevelState.Shop2;
+        else
+            return;
 
         GameMenusController menus = FindAnyObjectByType<GameMenusController>();
         if (menus != null)
         {
             menus.ShowShopMenu();
+        }
+    }
+
+    public static void ShowWeaponSelect()
+    {
+        GameMenusController menus = FindAnyObjectByType<GameMenusController>();
+        if (menus != null)
+        {
+            menus.ShowWeaponSelectMenu();
         }
     }
 }

@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameMenusController : MonoBehaviour
 {
@@ -27,6 +27,24 @@ public class GameMenusController : MonoBehaviour
     [SerializeField]
     private GameObject shopMenu;
 
+    [SerializeField]
+    private GameObject weaponSelectMenu;
+
+    [SerializeField]
+    private GameObject playerSprintSlider;
+
+    [SerializeField]
+    private GameObject armorIcon;
+
+    [SerializeField]
+    private GameObject stealthIcon;
+
+    [SerializeField]
+    private Image equippedWeaponIcon;
+
+    [SerializeField]
+    private GameObject equippedWeaponIconGO;
+
     private InputSystem_Actions controls;
     private bool shownBossUI = false;
 
@@ -38,6 +56,19 @@ public class GameMenusController : MonoBehaviour
         winMenu.SetActive(false);
         bossUI.SetActive(false);
         shopMenu.SetActive(false);
+        weaponSelectMenu.SetActive(false);
+        playerSprintSlider.SetActive(false);
+
+        // Wire sprint slider to player
+        if (player != null)
+        {
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            if (playerController != null && playerSprintSlider != null)
+            {
+                Slider slider = playerSprintSlider.GetComponent<Slider>();
+                playerController.SetSprintSlider(slider);
+            }
+        }
     }
 
     void FindBoss()
@@ -68,7 +99,7 @@ public class GameMenusController : MonoBehaviour
     void Update()
     {
         bool isPausePressed = controls.UI.Pause.triggered;
-        if (isPausePressed)
+        if (isPausePressed && !shopMenu.activeSelf && !weaponSelectMenu.activeSelf)
         {
             isPaused = !isPaused;
             if (isPaused)
@@ -76,6 +107,7 @@ public class GameMenusController : MonoBehaviour
             else
                 Resume();
         }
+        playerSprintSlider.SetActive(PowerUpManager.instance.IsPowerUpActive(PowerUpType.Speed));
 
         // Update boss UI healthbar
         if (boss != null)
@@ -90,6 +122,20 @@ public class GameMenusController : MonoBehaviour
                 bossUI.SetActive(false);
             }
         }
+
+        // Update armor and stealth icons
+        if (armorIcon != null)
+            armorIcon.SetActive(PowerUpManager.instance.IsPowerUpActive(PowerUpType.Armor));
+        if (stealthIcon != null)
+            stealthIcon.SetActive(PowerUpManager.instance.IsPowerUpActive(PowerUpType.Stealth));
+
+        if (equippedWeaponIconGO != null)
+        {
+            equippedWeaponIconGO.SetActive(
+                player != null && player.GetComponent<WeaponManager>().HasAnyWeapon()
+            );
+            equippedWeaponIcon.sprite = player.GetComponent<WeaponManager>().EquippedWeapon?.icon;
+        }
     }
 
     public void Pause()
@@ -102,6 +148,7 @@ public class GameMenusController : MonoBehaviour
     {
         pauseMenu.SetActive(false);
         shopMenu.SetActive(false);
+        weaponSelectMenu.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
     }
@@ -132,7 +179,7 @@ public class GameMenusController : MonoBehaviour
         winMenu.SetActive(true);
         Time.timeScale = 0f;
         GameObject lootText = winMenu.transform.Find("loottx").gameObject;
-        lootText.GetComponent<TextMeshProUGUI>().text = "Loot Collected: " + PickupLoot.lootCount;
+        lootText.GetComponent<TextMeshProUGUI>().text = "Loot Remaining: " + PickupLoot.lootCount;
         bossUI.SetActive(false);
     }
 
@@ -147,10 +194,34 @@ public class GameMenusController : MonoBehaviour
     {
         Time.timeScale = 0f;
         shopMenu.SetActive(true);
+        Shop shop = shopMenu.GetComponent<Shop>();
+        if (shop != null)
+            shop.Open(player);
+        else
+            Debug.LogError("Shop component not found on the shop menu.", shopMenu);
     }
 
     public bool IsBossUIActive()
     {
         return shownBossUI;
+    }
+
+    public void ShowWeaponSelectMenu()
+    {
+        WeaponEquipper equipper = weaponSelectMenu.GetComponent<WeaponEquipper>();
+        if (equipper == null)
+        {
+            Debug.LogError(
+                "WeaponEquipper component not found on the weapon selection menu.",
+                weaponSelectMenu
+            );
+            return;
+        }
+        if (!equipper.Open(player))
+            return;
+
+        Time.timeScale = 0f;
+        shopMenu.SetActive(false);
+        weaponSelectMenu.SetActive(true);
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using static SpawnUtility;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class RobotBossAI : MonoBehaviour
@@ -52,11 +53,18 @@ public class RobotBossAI : MonoBehaviour
     [SerializeField]
     private float upwardArc = 4f;
 
+    [Header("Loot")]
+    [SerializeField]
+    private GameObject lootPrefab;
+
     private Transform player;
     private NavMeshAgent agent;
     private bool isAttacking = false;
     private float nextSlamTime = 0f;
     private float nextThrowTime = 0f;
+    private Rigidbody dropBody;
+    private bool waitingForDrop;
+    private bool dropping;
 
     private void Awake()
     {
@@ -73,7 +81,7 @@ public class RobotBossAI : MonoBehaviour
 
     private void Update()
     {
-        if (isDead || player == null || isAttacking)
+        if (isDead || player == null || isAttacking || waitingForDrop)
             return;
 
         float distance = Vector3.Distance(transform.position, player.position);
@@ -111,6 +119,63 @@ public class RobotBossAI : MonoBehaviour
                 agent.isStopped = false;
                 agent.SetDestination(player.position);
             }
+        }
+    }
+
+    public void PrepareDrop()
+    {
+        waitingForDrop = true;
+        agent.enabled = false;
+        dropBody = GetComponent<Rigidbody>();
+        if (dropBody == null)
+            dropBody = gameObject.AddComponent<Rigidbody>();
+        dropBody.isKinematic = true;
+        dropBody.useGravity = true;
+        dropBody.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+
+    public void Drop()
+    {
+        if (isDead)
+            return;
+        if (dropBody == null)
+        {
+            Debug.LogError("Boss drop was not prepared.", this);
+            return;
+        }
+
+        dropping = true;
+        dropBody.isKinematic = false;
+        dropBody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!dropping || collision.gameObject.CompareTag("Player"))
+            return;
+
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            if (contact.normal.y <= 0.5f)
+                continue;
+
+            if (!NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+            {
+                Debug.LogError("Boss landed without a nearby NavMesh.", this);
+                return;
+            }
+
+            dropping = false;
+            dropBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            dropBody.isKinematic = true;
+            agent.enabled = true;
+            if (!agent.Warp(hit.position))
+            {
+                Debug.LogError("Could not place the boss on the NavMesh after landing.", this);
+                return;
+            }
+            waitingForDrop = false;
+            return;
         }
     }
 
@@ -188,6 +253,7 @@ public class RobotBossAI : MonoBehaviour
     {
         isDead = true;
         StopAllCoroutines();
+        SpawnLoot();
 
         if (agent.isActiveAndEnabled && agent.isOnNavMesh)
             agent.isStopped = true;
@@ -200,6 +266,18 @@ public class RobotBossAI : MonoBehaviour
             col.enabled = false;
 
         StartCoroutine(ShrinkAndDisable());
+    }
+
+    private void SpawnLoot()
+    {
+        if (lootPrefab == null)
+            return;
+
+        if (TryGetRandomNavMeshPosition(transform.position, 3f, out Vector3 spawnPosition))
+        {
+            GameObject newLoot = Instantiate(lootPrefab);
+            newLoot.transform.position = spawnPosition;
+        }
     }
 
     private IEnumerator ShrinkAndDisable()
