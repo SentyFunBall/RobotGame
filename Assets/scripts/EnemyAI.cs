@@ -597,6 +597,7 @@ public class EnemyAI : MonoBehaviour
 
     private void SpawnLoot()
     {
+        Debug.Log("Spawning loot");
         if (lootPrefab == null)
             return;
 

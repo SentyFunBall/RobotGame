@@ -88,7 +88,7 @@ MonoBehaviour:
   fuseDuration: 4
   cancelIfPlayerLeaves: 0
   explosionRadius: 5
-  playerDamage: 10000
+  playerDamage: 100
   damageEnemies: 1
   enemyDamage: 50
   knockbackForce: 12

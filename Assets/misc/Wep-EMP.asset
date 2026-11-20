@@ -18,7 +18,7 @@ MonoBehaviour:
   price: 4
   type: 0
   weaponDamage: 6
-  weaponRange: 6
+  weaponRange: 9
   weaponCooldown: 8
   weaponType: 1
   bulletPrefab: {fileID: 0}

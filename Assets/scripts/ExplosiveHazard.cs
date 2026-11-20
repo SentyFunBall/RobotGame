@@ -229,7 +229,11 @@ public class ExplosiveHazard : MonoBehaviour
             PlayerHealth playerHealth = hit.GetComponentInParent<PlayerHealth>();
             if (playerHealth != null && damagedRoots.Add(playerHealth.gameObject))
             {
-                playerHealth.TakeDamage(playerDamage);
+                float distToPlayer = Vector3.Distance(
+                    transform.position,
+                    playerHealth.transform.position
+                );
+                playerHealth.TakeDamage(playerDamage * (1f - distToPlayer / explosionRadius));
                 ApplyKnockback(
                     playerHealth.GetComponent<Rigidbody>(),
                     playerHealth.transform.position

@@ -94,6 +94,18 @@ MonoBehaviour:
   hitAudio: {fileID: 767541672897837036}
   attackAudio: {fileID: -2515694428712308490}
   lootPrefab: {fileID: 9085376655905517556, guid: 7ae8afebc6aae4ba0bfcd527376ebfc3, type: 3}
+  heavyWindupDelay: 1.25
+  heavyRecoveryDelay: 1
+  heavyAttackCooldown: 4.5
+  heavySlamRadius: 4
+  heavySlamForwardOffset: 1
+  heavyKnockbackForce: 8
+  heavySlamVfxPrefab: {fileID: 0}
+  heavyTelegraphColor: {r: 1, g: 0.45, b: 0, a: 1}
+  heavyWalkingBoolParam: IsWalking
+  heavyAttackTriggerParam: Attack
+  heavyDieTriggerParam: Die
+  heavyWalkSpeedThreshold: 0.1
 --- !u!114 &6081913651945602409
 MonoBehaviour:
   m_ObjectHideFlags: 0
