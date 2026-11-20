@@ -639,6 +639,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 143344520}
   m_CullTransparentMesh: 1
+--- !u!1 &224002467 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6462631502958609099, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+  m_PrefabInstance: {fileID: 225993103}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &224002468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 224002467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a2fcf21465b4d4f851c4d6e6cc6f61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HazardGenerator
+  hazardPrefabs:
+  - {fileID: 5831412806133714900, guid: f874623f0ccd5ed42a151c0a7d454cb3, type: 3}
+  maxHazardsPerRoom: 1
+  spawnOffsetRadius: 4
+  minHazardSpacing: 9
+  trapRoomChanceMultiplier: 2
+  yOffset: 0
 --- !u!1001 &225993103
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -710,7 +734,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6462631502958609099, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 224002468}
   m_SourcePrefab: {fileID: 100100000, guid: 01ae12a1c8ba6ba49a451dadbb4d55c0, type: 3}
 --- !u!1 &310625899
 GameObject:
@@ -6534,6 +6561,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   enemyPrefabs:
   - {fileID: 4710264686728733128, guid: 0948dd00a4bdf624793b8e70fd063ab7, type: 3}
+  - {fileID: 8335801812827707709, guid: 0aa9cd64f346fa349a38ec8c43a46cf0, type: 3}
 --- !u!4 &1955515130
 Transform:
   m_ObjectHideFlags: 0

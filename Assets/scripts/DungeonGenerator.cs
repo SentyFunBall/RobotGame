@@ -74,6 +74,9 @@ public class DungeonGenerator : MonoBehaviour
     public void Reset()
     {
         GetComponent<LootGenerator>().Reset();
+        HazardGenerator hazardGenerator = GetComponent<HazardGenerator>();
+        if (hazardGenerator != null)
+            hazardGenerator.Reset();
         GenerateNavMesh.Reset();
 
         ClearRooms();
@@ -824,6 +827,9 @@ public class DungeonGenerator : MonoBehaviour
             if (useBossEnd)
                 SpawnBoss();
             StartCoroutine(GetComponent<LootGenerator>().GenerateLoot());
+            HazardGenerator hazardGenerator = GetComponent<HazardGenerator>();
+            if (hazardGenerator != null)
+                StartCoroutine(hazardGenerator.GenerateHazards());
         }
 
         //MovePlayerToStart();
